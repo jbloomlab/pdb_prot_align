@@ -9,5 +9,6 @@ channels:
 dependencies:
   - python==3.6
   - pip
-  # list packages to install with pip, pinned to exact version
+  # list packages to install with pip
   - pip:
+    - .
