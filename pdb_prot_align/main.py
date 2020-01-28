@@ -12,6 +12,8 @@ import Bio.AlignIO
 import Bio.Seq
 import Bio.SeqIO
 
+import numpy
+
 import pdb_prot_align
 import pdb_prot_align.utils
 
@@ -57,8 +59,8 @@ _ARGS = {
               'required': True,
               'help': 'created CSV with sequential sites in reference, PDB '
                       'sites, wildtype in reference, wildtype in PDB, amino '
-                      'amino acid, frequency of amino acid, number of '
-                      'effective amino acids at site, site entropy in bits ',
+                      'amino acid, frequency of amino acid, site entropy in '
+                      'bits, number of effective amino acids at site',
               'type': str,
               },
          'chain_identity': {
@@ -194,9 +196,64 @@ def run(protsfile,
     aln = pdb_prot_align.utils.strip_gaps_to_ref(aln,
                                                  refprot.description)
     assert all(len(refprot) == len(s) for _, s in aln)
-    print(f"Writing gap-stripped alignment to {alignment}")
+    print(f"Writing gap-stripped alignment to {alignment}\n")
     with open(alignment, 'w') as f:
         f.write('\n'.join(f">{head}\n{s}" for head, s in aln))
+
+    # Create data frame that will become `csv` output.
+    # First get site numbers and wildtype.
+    df = (
+        ref_pdb_site_map
+        .rename(columns={refprot.description: 'isite',
+                         pdb_prot.description: 'pdb_isite'})
+        .assign(pdb_site=lambda x: (x['pdb_isite']
+                                    .map(pdb_df
+                                         .set_index('sequential')
+                                         ['pdb_site']
+                                         .to_dict(),
+                                         na_action='ignore')
+                                    ),
+                wildtype=lambda x: (x['isite']
+                                    .map({i + 1: wt for i, wt in
+                                          enumerate(str(refprot.seq))},
+                                         na_action='ignore')
+                                    ),
+                pdb_wildtype=lambda x: (x['pdb_isite']
+                                        .map(pdb_df
+                                             .set_index('sequential')
+                                             ['wildtype']
+                                             .to_dict(),
+                                             na_action='ignore')
+                                        ),
+                )
+        [['isite', 'pdb_site', 'wildtype', 'pdb_wildtype']]
+        .merge(pdb_prot_align.utils.alignment_to_count_df(
+                                            alignment,
+                                            ignore_gaps=ignore_gaps,
+                                            as_freqs=True),
+               on='isite',
+               validate='one_to_one',
+               )
+        .set_index(['isite', 'pdb_site', 'wildtype', 'pdb_wildtype'])
+        .assign(
+            entropy=lambda x: x.apply(lambda r: -(r[r > 0] *
+                                                  numpy.log(r[r > 0])).sum(),
+                                      axis=1),
+            n_effective=lambda x: numpy.exp(x['entropy'])
+            )
+        .reset_index()
+        .melt(id_vars=['isite', 'pdb_site', 'wildtype', 'pdb_wildtype',
+                       'entropy', 'n_effective'],
+              var_name='amino_acid',
+              value_name='frequency',
+              )
+        .sort_values(['isite', 'amino_acid'])
+        )
+
+    print(f"Writing CSV with detailed information to {csv}")
+    df.to_csv(csv, index=False, float_format='%.5f')
+
+    print(f"\nProgram complete.\n")
 
 
 # complete docs for `run` with parameter specs parsed from `_ARGS`

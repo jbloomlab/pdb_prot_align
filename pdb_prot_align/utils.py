@@ -1,6 +1,7 @@
 """Utilities for aligning proteins to PDB."""
 
 
+import collections
 import re
 import subprocess
 import tempfile
@@ -16,6 +17,107 @@ import Bio.SeqUtils
 import natsort
 
 import pandas as pd
+
+
+def alignment_to_count_df(fasta_alignment,
+                          *,
+                          ignore_gaps=False,
+                          as_freqs=False,
+                          ):
+    """Convert FASTA alignment to counts data frame.
+
+    Parameters
+    ----------
+    fasta_alignment : str
+        FASTA file with alignment.
+    ignore_gaps : bool
+        Ignore gap characters ('-') in counts.
+    as_freqs : bool
+        Return frequencies rather than counts.
+
+    Returns
+    -------
+    pandas.DataFrame
+        First column ('isite') is 1, 2, ... site numbering. Other columns give
+        counts of each observed alignment character at that site.
+
+    Example
+    --------
+    >>> with tempfile.NamedTemporaryFile('w+') as f:
+    ...     _ = f.write(textwrap.dedent(
+    ...             '''
+    ...             >seq1
+    ...             GK-AC-L
+    ...             >seq2
+    ...             -K-AM-L
+    ...             >seq3
+    ...             G-NAC-L
+    ...             >seq4
+    ...             GK-ACSI
+    ...             '''
+    ...             ))
+    ...     f.flush()
+    ...     counts = alignment_to_count_df(f.name)
+    ...     counts_nogaps = alignment_to_count_df(f.name, ignore_gaps=True)
+    ...     freqs_nogaps = alignment_to_count_df(f.name,
+    ...                                          ignore_gaps=True,
+    ...                                          as_freqs=True)
+    >>> counts
+       isite  -  A  C  G  I  K  L  M  N  S
+    0      1  1  0  0  3  0  0  0  0  0  0
+    1      2  1  0  0  0  0  3  0  0  0  0
+    2      3  3  0  0  0  0  0  0  0  1  0
+    3      4  0  4  0  0  0  0  0  0  0  0
+    4      5  0  0  3  0  0  0  0  1  0  0
+    5      6  3  0  0  0  0  0  0  0  0  1
+    6      7  0  0  0  0  1  0  3  0  0  0
+    >>> counts_nogaps
+       isite  A  C  G  I  K  L  M  N  S
+    0      1  0  0  3  0  0  0  0  0  0
+    1      2  0  0  0  0  3  0  0  0  0
+    2      3  0  0  0  0  0  0  0  1  0
+    3      4  4  0  0  0  0  0  0  0  0
+    4      5  0  3  0  0  0  0  1  0  0
+    5      6  0  0  0  0  0  0  0  0  1
+    6      7  0  0  0  1  0  3  0  0  0
+    >>> freqs_nogaps.round(2)
+       isite    A     C     G     I     K     L     M     N     S
+    0      1  0.0  0.00  0.75  0.00  0.00  0.00  0.00  0.00  0.00
+    1      2  0.0  0.00  0.00  0.00  0.75  0.00  0.00  0.00  0.00
+    2      3  0.0  0.00  0.00  0.00  0.00  0.00  0.00  0.25  0.00
+    3      4  1.0  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+    4      5  0.0  0.75  0.00  0.00  0.00  0.00  0.25  0.00  0.00
+    5      6  0.0  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.25
+    6      7  0.0  0.00  0.00  0.25  0.00  0.75  0.00  0.00  0.00
+
+    """
+    seqs = [str(s.seq) for s in Bio.AlignIO.read(fasta_alignment, 'fasta')]
+    counts = {}
+    for i, i_chars in enumerate(zip(*seqs)):
+        counts[i + 1] = collections.Counter(i_chars)
+
+    # nested dict to data frame: https://stackoverflow.com/a/54300940
+    df = (pd.concat({site: pd.DataFrame(site_counts, index=[0])
+                     for site, site_counts in counts.items()},
+                    axis=0,
+                    ignore_index=True,
+                    sort=True)
+          .fillna(0)
+          .astype(int)
+          .assign(isite=lambda x: x.index + 1)
+          )
+    cols = ['isite'] + [char for char in df.columns[: -1]
+                        if char != '-' or not ignore_gaps]
+
+    if as_freqs:
+        df = (df
+              .set_index('isite')
+              .div(df.set_index('isite').sum(axis=1),
+                   axis=0)
+              .reset_index()
+              )
+
+    return df[cols]
 
 
 def align_prots_mafft(prots, *, mafft='mafft'):
