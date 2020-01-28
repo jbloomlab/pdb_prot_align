@@ -2,10 +2,18 @@
 
 
 import argparse
+import os
+import re
 import sys
 import textwrap
 
+import Bio.AlignIO
+import Bio.Seq
+import Bio.SeqIO
+import Bio.SeqRecord
+
 import pdb_prot_align
+import pdb_prot_align.utils
 
 
 def _run_main():
@@ -16,14 +24,14 @@ def _run_main():
 
 # arguments for command-line parser and `pdb_prot_align`
 _ARGS = {
-         'prots': {
+         'protsfile': {
               'required': True,
               'help': 'input FASTA file of protein sequences',
               'type': str,
               },
-         'refprot': {
+         'refprot_regex': {
               'required': True,
-              'help': 'regex unique for reference protein header in `prots`',
+              'help': 'regex for reference protein header in `protsfile`',
               'type': str,
               },
          'pdbfile': {
@@ -34,20 +42,22 @@ _ARGS = {
          'chain_ids': {
               'required': True,
               'help': 'chains in PDB file, must be identical monomers if > 1',
-              'type': list,
+              'type': str,
               'nargs': '+',
               },
          'alignment': {
               'required': True,
-              'help': 'created FASTA alignment of proteins, gaps relative to '
-                      'reference are stripped',
+              'help': 'created FASTA alignment of proteins with gaps relative '
+                      'to reference are stripped, the non-stripped alignment '
+                      'written to file with suffix "_unstripped"',
               'type': str,
               },
          'csv': {
               'required': True,
               'help': 'created CSV with sequential sites in reference, PDB '
-                      'sites, wildtype in reference, amino acid, frequency of '
-                      'amino acid, number of effective amino acids at site',
+                      'sites, wildtype in reference, wildtype in PDB, amino '
+                      'amino acid, frequencye of amino acid, number of '
+                      'effective amino acids at site',
               'type': str,
               },
          'chain_identity': {
@@ -62,12 +72,6 @@ _ARGS = {
               'default': True,
               'help': 'drop protein in `pdbfile` from `alignment` and '
                       '`csv` stats',
-              'type': bool,
-              },
-         'allow_stop': {
-              'required': False,
-              'default': False,
-              'help': 'treat stop codons (*) as valid amino acid',
               'type': bool,
               },
          }
@@ -95,6 +99,8 @@ _PARAM_DOCS = []
 for param, param_d in _ARGS.items():
     if 'choices' in param_d:
         param_type = f"{{{', '.join(param_d['choices'])}}}"
+    elif 'nargs' in param_d and param_d['nargs'] == '+':
+        param_type = 'list'
     else:
         param_type = param_d['type'].__name__
     param_help = textwrap.indent('\n'.join(textwrap.wrap(param_d['help'], 70)),
@@ -104,8 +110,8 @@ _PARAM_DOCS = '\n'.join(_PARAM_DOCS)
 del param, param_d, param_type, param_help
 
 
-def run(prots,
-        refprot,
+def run(protsfile,
+        refprot_regex,
         pdbfile,
         chain_ids,
         alignment,
@@ -121,11 +127,54 @@ def run(prots,
     {_PARAM_DOCS}
 
     """
-    pass
+    print(f"\nRunning `pdb_prot_align` {pdb_prot_align.__version__}\n")
+    if not os.path.isfile(pdbfile):
+        raise IOError(f"no `pdbfile` of {pdbfile}")
+
+    print(f"Parsing PDB {pdbfile} chains {' '.join(chain_ids)}")
+    pdb_df = pdb_prot_align.utils.pdb_seq_to_number(pdbfile,
+                                                    chain_ids,
+                                                    chain_identity)
+    print(f"Parsed sequence of {len(pdb_df)} residues, ranging "
+          f"from {pdb_df['pdb_site'].values[0]} to "
+          f"{pdb_df['pdb_site'].values[-1]} in PDB numbering.\n")
+    pdb_prot = Bio.SeqRecord.SeqRecord(
+            Bio.Seq.Seq(''.join(pdb_df['wildtype'].values)),
+            id=f"PDB_{os.path.splitext(os.path.basename(pdbfile))[0]}",
+            description='',
+            )
+    assert len(pdb_prot) == len(pdb_df)
+
+    if not os.path.isfile(protsfile):
+        raise IOError(f"no `protsfile` file {protsfile}")
+    prots = list(Bio.SeqIO.parse(protsfile, 'fasta'))
+    print(f"Read {len(prots)} sequences from {protsfile}")
+    if any(p.description.strip() == pdb_prot.description.strip()
+           for p in prots):
+        raise ValueError(f"sequences in {protsfile} cannot have header "
+                         f"{pdb_prot.description.strip()}")
+
+    refprot = [s for s in prots if re.search(refprot_regex, s.description)]
+    if not refprot:
+        raise ValueError(f"no headers in {protsfile} match `refprot_regex` "
+                         f"{refprot_regex}")
+    elif len(refprot) > 1:
+        raise ValueError(f"multiple headers in {protsfile} match "
+                         f"`refprot_regex` {refprot_regex}:\n" +
+                         '\n'.join(s.description for s in refprot))
+    else:
+        refprot = refprot[0]
+        print(f"Reference protein is of length {len(refprot)} and has "
+              f"the following header:\n{refprot.description}\n")
+
+    base, ext = os.path.splitext(alignment)
+    alignment_unstripped = f"{base}_unstripped{ext}"
+    print(f"Using `mafft` to align sequences to {alignment_unstripped}")
+    aln = pdb_prot_align.utils.align_prots_mafft(prots + [pdb_prot])
+    Bio.AlignIO.write(aln, alignment_unstripped, 'fasta')
 
 
-pdb_prot_align.__doc__ = pdb_prot_align.__doc__.format(
-                                _PARAM_DOCS=_PARAM_DOCS.lstrip())
+run.__doc__ = run.__doc__.format(_PARAM_DOCS=_PARAM_DOCS.lstrip())
 
 
 if __name__ == '__main__':

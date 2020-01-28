@@ -1,12 +1,73 @@
 """Utilities for aligning proteins to PDB."""
 
 
+import re
+import subprocess
+import tempfile
+import warnings
+
+import Bio.AlignIO
+import Bio.Data.IUPACData
 import Bio.PDB
+import Bio.SeqIO
 import Bio.SeqUtils
 
 import natsort
 
 import pandas as pd
+
+
+def align_prots_mafft(prots, *, mafft='mafft'):
+    """Align protein sequences with ``mafft``.
+
+    Parameters
+    ----------
+    prots : list
+        List of sequences as `Biopython.SeqRecord.SeqRecord` objects.
+    alignmentfile : str
+        Name of created FASTA alignment.
+    mafft : str
+        Command that resolves to ``mafft`` executable.
+
+    Returns
+    -------
+    Bio.Align.MultipleSeqAlignment
+        The protein alignment.
+
+    """
+    for p in prots:
+        if not re.fullmatch(
+                f"[{Bio.Data.IUPACData.extended_protein_letters}]+",
+                str(p.seq)):
+            raise ValueError(f"invalid amino acids for {p.description}\n" +
+                             str(p.seq))
+
+    try:
+        _ = subprocess.run([mafft, '--version'],
+                           check=True,
+                           stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL,
+                           )
+    except FileNotFoundError:
+        raise ValueError(f"cannot call `mafft` executable with: {mafft}")
+
+    with tempfile.NamedTemporaryFile('w') as prots_in:
+        Bio.SeqIO.write(prots, prots_in, 'fasta')
+        prots_in.flush()
+        res = subprocess.run([mafft, '--amino', prots_in.name],
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.DEVNULL,
+                             universal_newlines=True,
+                             )
+        alignment_text = res.stdout
+
+    with tempfile.TemporaryFile('w+') as f:
+        f.write(alignment_text)
+        f.flush()
+        f.seek(0)
+        aln = Bio.AlignIO.read(f, 'fasta')
+
+    return aln
 
 
 def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
@@ -34,7 +95,12 @@ def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
             - 'wildtype' : wildtype residue identity (1-letter code)
 
     """
-    structure = Bio.PDB.PDBParser().get_structure('_', pdbfile)
+    with warnings.catch_warnings():
+        warnings.simplefilter(
+                'ignore',
+                category=Bio.PDB.PDBExceptions.PDBConstructionWarning)
+        structure = Bio.PDB.PDBParser().get_structure('_', pdbfile)
+
     if len(structure) != 1:
         raise ValueError(f"{pdbfile} has multiple models")
     else:

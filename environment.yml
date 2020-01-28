@@ -4,11 +4,13 @@ name: pdb_prot_align-environment
 # channels to install conda dependencies
 channels:
   - conda-forge
+  - bioconda
 
 # conda dependencies
 dependencies:
   - python==3.6
   - pip
+  - mafft
   # list packages to install with pip
   - pip:
     - .

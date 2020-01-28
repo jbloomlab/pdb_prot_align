@@ -11,7 +11,7 @@ pdb_prot_align
 .. image:: https://mybinder.org/badge_logo.svg
         :target: https://mybinder.org/v2/gh/jbloomlab/pdb_prot_align/master?filepath=notebooks
 
-Align proteins to PDB chains
+Align proteins to chains in PDB structures.
 
 ``pdb_prot_align`` is a Python package written by `the Bloom lab <https://research.fhcrc.org/bloom/en.html>`_.
 
