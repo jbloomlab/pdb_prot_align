@@ -4,6 +4,7 @@
 import re
 import subprocess
 import tempfile
+import textwrap  # noqa: F401
 import warnings
 
 import Bio.AlignIO
@@ -68,6 +69,97 @@ def align_prots_mafft(prots, *, mafft='mafft'):
         aln = Bio.AlignIO.read(f, 'fasta')
 
     return aln
+
+
+def aligned_site_map(aln, heads):
+    """Get mapping between sequential site numbers of aligned sequences.
+
+    Parameters
+    ----------
+    aln : Bio.Align.MultipleSeqAlignment
+        Alignment of sequences
+    heads : list
+        Headers of sequences of interest in `aln`, must be at least two.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Columns are sequence names in `heads`. There is a row for alignment
+        positions that are non-gapped in at least one sequence in `heads`, and
+        the entry in the row gives the number of that site in 1, 2, ...
+        numbering of the sequence, or `NaN` if there is no residue for
+        sequence at that position in alignment.
+
+    Example
+    -------
+    >>> with tempfile.TemporaryFile('w+') as f:
+    ...     _ = f.write(textwrap.dedent(
+    ...             '''
+    ...             >seq1
+    ...             GK-AC-L
+    ...             >seq2
+    ...             -K-AM-L
+    ...             >seq3
+    ...             G-NAC-L
+    ...             >seq4
+    ...             GK-ACSI
+    ...             '''
+    ...             ))
+    ...     f.flush()
+    ...     _ = f.seek(0)
+    ...     aln = Bio.AlignIO.read(f, 'fasta')
+    >>> aligned_site_map(aln, ['seq1', 'seq2', 'seq3'])
+       seq1  seq2  seq3
+    0     1   NaN     1
+    1     2     1   NaN
+    2   NaN   NaN     2
+    3     3     2     3
+    4     4     3     4
+    5     5     4     5
+
+    """
+    heads_set = set(heads)
+    if len(heads) != len(heads_set):
+        raise ValueError(f"non-unique entries in `heads`:\n{heads}")
+    if len(heads) < 2:
+        raise ValueError('`heads` does not have at least 2 entries')
+
+    aln_heads = [s.description for s in aln]
+    aln_heads_set = set(aln_heads)
+    if len(aln_heads) != len(aln_heads_set):
+        raise ValueError('alignment has non-unique headers')
+    missing_heads = heads_set - aln_heads_set
+    if missing_heads:
+        raise ValueError('following headers in `heads` but not alignment:\n' +
+                         '\n'.join(missing_heads))
+    select_aln = []
+    for s in aln:
+        if s.description in heads_set:
+            select_aln.append((s.description, str(s.seq)))
+    assert len(select_aln) == len(heads)
+
+    aln_length = len(select_aln[0][1])
+    if any(aln_length != len(s) for _, s in select_aln):
+        raise ValueError('aligned sequences not all of same length')
+
+    site_lists = {head: [] for head in heads}
+    indices = {head: 0 for head in heads}
+
+    for i in range(aln_length):
+        for head, s in select_aln:
+            if s[i] == '-':
+                site_lists[head].append(float('nan'))
+            else:
+                indices[head] += 1
+                site_lists[head].append(indices[head])
+
+    df = (pd.DataFrame(site_lists, dtype='Int64')
+          [heads]
+          .dropna(axis=0, how='all')
+          .reset_index(drop=True)
+          )
+
+    return df
 
 
 def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
