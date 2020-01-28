@@ -49,16 +49,16 @@ _ARGS = {
          'alignment': {
               'required': True,
               'help': 'created FASTA alignment of proteins with gaps relative '
-                      'to reference are stripped, the non-stripped alignment '
-                      'written to file with suffix "_unstripped"',
+                      'to reference are stripped; non-stripped alignment with '
+                      'PDB protein written to file with suffix "_unstripped"',
               'type': str,
               },
          'csv': {
               'required': True,
               'help': 'created CSV with sequential sites in reference, PDB '
                       'sites, wildtype in reference, wildtype in PDB, amino '
-                      'amino acid, frequencye of amino acid, number of '
-                      'effective amino acids at site',
+                      'amino acid, frequency of amino acid, number of '
+                      'effective amino acids at site, site entropy in bits ',
               'type': str,
               },
          'chain_identity': {
@@ -67,6 +67,13 @@ _ARGS = {
               'choices': ['union', 'intersection', 'require_same'],
               'help': 'if sites differ among chains, get union, intersection, '
                       'or raise error if not same sites',
+              },
+         'ignore_gaps': {
+              'required': False,
+              'default': True,
+              'help': 'ignore gaps (-) when calculating frequencies, number '
+                      'effective amino acids, entropy',
+              'type': bool,
               },
          'drop_pdb': {
               'required': False,
@@ -102,8 +109,8 @@ def run(protsfile,
         alignment,
         csv,
         chain_identity='union',
+        ignore_gaps=True,
         drop_pdb=True,
-        allow_stop=False,
         ):
     """Run main function to align proteins to reference and PDB chain(s).
 
@@ -165,6 +172,7 @@ def run(protsfile,
     alignment_unstripped = f"{base}_unstripped{ext}"
     print(f"Using `mafft` to align sequences to {alignment_unstripped}")
     aln = pdb_prot_align.utils.align_prots_mafft(prots + [pdb_prot])
+    assert len(aln) == len(prots) + 1
     Bio.AlignIO.write(aln, alignment_unstripped, 'fasta')
 
     # get mapping of reference protein and PDB sequential sites
@@ -174,6 +182,21 @@ def run(protsfile,
                             )
     assert all(len(p) == len(ref_pdb_site_map[p.description].dropna())
                for p in [pdb_prot, refprot])
+
+    # remove PDB sequence?
+    if drop_pdb:
+        print(f"Dropping PDB sequence {pdb_prot.description} from alignment")
+        aln = [s for s in aln if s.description != pdb_prot.description]
+        assert len(aln) == len(prots)
+
+    # strip gaps relative to reference sequence
+    print(f"Stripping gaps relative to reference {refprot.description}")
+    aln = pdb_prot_align.utils.strip_gaps_to_ref(aln,
+                                                 refprot.description)
+    assert all(len(refprot) == len(s) for _, s in aln)
+    print(f"Writing gap-stripped alignment to {alignment}")
+    with open(alignment, 'w') as f:
+        f.write('\n'.join(f">{head}\n{s}" for head, s in aln))
 
 
 # complete docs for `run` with parameter specs parsed from `_ARGS`

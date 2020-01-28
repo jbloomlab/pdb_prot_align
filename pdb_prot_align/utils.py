@@ -274,6 +274,70 @@ def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
     return df
 
 
+def strip_gaps_to_ref(aln, ref_head):
+    """Strip gaps in alignment relative to reference.
+
+    Parameters
+    ----------
+    aln : Bio.Align.MultipleSeqAlignment
+        The alignment of sequences.
+    ref_head : str
+        Header of reference sequence in `aln`.
+
+    Returns
+    -------
+    list
+        Alignment as list of  2-tuples of strings (`header, sequence`) with
+        all gaps relative to reference removed.
+
+    Example
+    -------
+    >>> with tempfile.TemporaryFile('w+') as f:
+    ...     _ = f.write(textwrap.dedent(
+    ...             '''
+    ...             >seq1
+    ...             GK-AC-L
+    ...             >seq2
+    ...             -K-AM-L
+    ...             >seq3
+    ...             G-NAC-L
+    ...             >seq4
+    ...             GK-ACSI
+    ...             '''
+    ...             ))
+    ...     f.flush()
+    ...     _ = f.seek(0)
+    ...     aln = Bio.AlignIO.read(f, 'fasta')
+    >>> strip_gaps_to_ref(aln, 'seq1')  # doctest: +NORMALIZE_WHITESPACE
+    [('seq1', 'GKACL'),
+     ('seq2', '-KAML'),
+     ('seq3', 'G-ACL'),
+     ('seq4', 'GKACI')]
+
+    """
+    aln = [(s.description, str(s.seq)) for s in aln]
+    refseq = [s for head, s in aln if head == ref_head]
+    if not refseq:
+        raise ValueError(f"alignment lacks `ref_head`:\n{ref_head}")
+    elif len(refseq) > 1:
+        raise ValueError(f"alignment has {len(refseq)} sequences with "
+                         f"`ref_head`:\n{ref_head}")
+    else:
+        refseq = refseq[0]
+    ungapped_indices = [i for i, aa in enumerate(refseq) if aa != '-']
+    if not ungapped_indices:
+        raise ValueError('no ungapped sites in reference')
+
+    if any(len(refseq) != len(s) for _, s in aln):
+        raise ValueError('sequences in `aln` not all same length')
+
+    ungapped_aln = []
+    for head, s in aln:
+        ungapped_aln.append((head, ''.join(s[i] for i in ungapped_indices)))
+
+    return ungapped_aln
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
