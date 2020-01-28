@@ -18,57 +18,56 @@ def _run_main():
 _ARGS = {
          'prots': {
               'required': True,
-              'help': 'Input FASTA file of protein sequences.',
+              'help': 'input FASTA file of protein sequences',
               'type': str,
               },
          'refprot': {
               'required': True,
-              'help': 'Unique regex for reference protein in `prots`.',
+              'help': 'regex unique for reference protein header in `prots`',
               'type': str,
               },
          'pdbfile': {
               'required': True,
-              'help': 'Input PDB file.',
+              'help': 'input PDB file',
               'type': str,
               },
          'chain_ids': {
               'required': True,
-              'help': 'Chains in PDB file, must be identical monomers if > 1.',
+              'help': 'chains in PDB file, must be identical monomers if > 1',
               'type': list,
               'nargs': '+',
               },
          'alignment': {
               'required': True,
-              'help': 'Created FASTA alignment of proteins.',
+              'help': 'created FASTA alignment of proteins, gaps relative to '
+                      'reference are stripped',
               'type': str,
               },
          'csv': {
               'required': True,
-              'help': 'Created tidy CSV with sequential sites ("isite"), '
-                      'PDB sites ("pdb_site"), wildtype ("wildtype") in '
-                      'refprot, amino acid identity ("amino acid"), '
-                      'frequency of amino acid ("frequency"), and '
-                      'number effective amino acids at site ("neffective").',
+              'help': 'created CSV with sequential sites in reference, PDB '
+                      'sites, wildtype in reference, amino acid, frequency of '
+                      'amino acid, number of effective amino acids at site',
               'type': str,
               },
          'chain_identity': {
               'required': False,
               'default': 'union',
-              'choices': ['union', 'intersection', 'exact'],
-              'help': 'If sites differ among chains, get union, intersection '
-                      'or raise error if not exact same sites.',
+              'choices': ['union', 'intersection', 'require_same'],
+              'help': 'if sites differ among chains, get union, intersection, '
+                      'or raise error if not same sites',
               },
          'drop_pdb': {
               'required': False,
               'default': True,
-              'help': 'Drop protein in `pdbfile` from `alignment` and '
-                      '`csv` stats.',
+              'help': 'drop protein in `pdbfile` from `alignment` and '
+                      '`csv` stats',
               'type': bool,
               },
          'allow_stop': {
               'required': False,
               'default': False,
-              'help': 'Treat stop ("*") codons as valid amino acid.',
+              'help': 'treat stop codons (*) as valid amino acid',
               'type': bool,
               },
          }
@@ -78,7 +77,7 @@ def get_parser():
     """Command-line `argparse.ArgumentParser` for ``pdb_prot_align``."""
     parser = argparse.ArgumentParser(
                     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                    description='Align proteins to reference and PDB chain(s)',
+                    description='Align proteins to reference and PDB.',
                     )
 
     parser.add_argument('-v', '--version', action='version',

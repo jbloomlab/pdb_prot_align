@@ -19,17 +19,17 @@ def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
     chain_ids : list
         List of chains in PDB file. All these chains must correspond to the
         same underlying molecule (i.e., be monomers in homo-oligomer).
-    chain_identity : {'union', 'intersection', 'exact'}
+    chain_identity : {'union', 'intersection', 'require_same'}
         How to parse chains. They are required to share the same wildtype
         at all sites they have in common. If all sites are not shared
         between all chains, take the union, the intersection, or raise
-        an error if they are not all exactly the same.
+        an error if they are not exactly the same.
 
     Returns
     -------
     pandas.DataFrame
         Columns are:
-            - 'isite' : sequential 0, 1, ... numbering of residues
+            - 'sequential' : sequential 1, 2, ... numbering of residues
             - 'pdb_site' : PDB file residue number
             - 'wildtype' : wildtype residue identity (1-letter code)
 
@@ -74,7 +74,7 @@ def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
         raise ValueError(f"{pdbfile} chains {', '.join(chain_ids)} differ in "
                          f"wildtype at sites:\n{', '.join(mismatched_wt)}")
 
-    if chain_identity == 'exact':
+    if chain_identity == 'require_same':
         not_exact = (
             df
             .groupby(['pdb_site', 'wildtype'], sort=False)
@@ -110,8 +110,8 @@ def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
     df = (df
           .reindex(index=natsort.natsorted(df.index))
           .reset_index()
-          .assign(isite=lambda x: x.reset_index().index)
-          [['isite', 'pdb_site', 'wildtype']]
+          .assign(sequential=lambda x: x.reset_index().index + 1)
+          [['sequential', 'pdb_site', 'wildtype']]
           )
     return df
 
