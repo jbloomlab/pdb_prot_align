@@ -1,4 +1,14 @@
-"""Main PDB / protein alignment function."""
+"""
+=======
+main
+=======
+
+Main PDB / protein alignment function.
+
+You can run all of the command-line functionality of ``pdb_prot_align`` via
+the :func:`run` function.
+
+"""
 
 
 import argparse
@@ -115,6 +125,11 @@ def run(protsfile,
         drop_pdb=True,
         ):
     """Run main function to align proteins to reference and PDB chain(s).
+
+    Note
+    ----
+    This function implements the full command-line functionality of
+    ``pdb_prot_align`` via a Python function.
 
     Parameters
     ----------
