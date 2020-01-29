@@ -1,0 +1,518 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Alignment of beta-coronavirus Spike proteins to a SARS-CoV structure &#8212; pdb_prot_align 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pdb_prot_align package" href="pdb_prot_align.html" />
+    <link rel="prev" title="Examples" href="examples.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 5ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="Alignment-of-beta-coronavirus-Spike-proteins-to-a-SARS-CoV-structure">
+<h1>Alignment of beta-coronavirus Spike proteins to a SARS-CoV structure<a class="headerlink" href="#Alignment-of-beta-coronavirus-Spike-proteins-to-a-SARS-CoV-structure" title="Permalink to this headline">¶</a></h1>
+<p>In this example, we align a set of beta-coronavirus Spike proteins to each other and to the protein structure of a SARS-CoV Spike.</p>
+<p>The set of coronavirus Spike proteins are those that had their RBD domains studied by <a class="reference external" href="https://www.biorxiv.org/content/10.1101/2020.01.22.915660v1">Lekto and Munster (2019)</a>, and are from the Genbank accessions in Supplementary figure 1 of their pre-print. The <strong>un-aligned</strong> set of Spike protein sequences is in <a class="reference external" href="input_files/beta_coronavirus_Spikes.fa">input_files/beta_coronavirus_Spikes.fa</a>. Here are the first few lines:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span> head -n <span class="m">4</span> input_files/beta_coronavirus_Spikes.fa
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&gt;AY278741|SARS Urbani|human
+MFIFLLFLTLTSGSDLDRCTTFDDVQAPNYTQHTSSMRGVYYPDEIFRSDTLYLTQDLFLPFYSNVTGFHTINHTFGNPVIPFKDGIYFAATEKSNVVRGWVFGSTMNNKSQSVIIINNSTNVVIRACNFELCDNPFFAVSKPMGTQTHTMIFDNAFNCTFEYISDAFSLDVSEKSGNFKHLREFVFKNKDGFLYVYKGYQPIDVVRDLPSGFNTLKPIFKLPLGINITNFRAILTAFSPAQDIWGTSAAAYFVGYLKPTTFMLKYDENGTITDAVDCSQNPLAELKCSVKSFEIDKGIYQTSNFRVVPSGDVVRFPNITNLCPFGEVFNATKFPSVYAWERKKISNCVADYSVLYNSTFFSTFKCYGVSATKLNDLCFSNVYADSFVVKGDDVRQIAPGQTGVIADYNYKLPDDFMGCVLAWNTRNIDATSTGNYNYKYRYLRHGKLRPFERDISNVPFSPDGKPCTPPALNCYWPLNDYGFYTTTGIGYQPYRVVVLSFELLNAPATVCGPKLSTDLIKNQCVNFNFNGLTGTGVLTPSSKRFQPFQQFGRDVSDFTDSVRDPKTSEILDISPCSFGGVSVITPGTNASSEVAVLYQDVNCTDVSTAIHADQLTPAWRIYSTGNNVFQTQAGCLIGAEHVDTSYECDIPIGAGICASYHTVSLLRSTSQKSIVAYTMSLGADSSIAYSNNTIAIPTNFSISITTEVMPVSMAKTSVDCNMYICGDSTECANLLLQYGSFCTQLNRALSGIAAEQDRNTREVFAQVKQMYKTPTLKYFGGFNFSQILPDPLKPTKRSFIEDLLFNKVTLADAGFMKQYGECLGDINARDLICAQKFNGLTVLPPLLTDDMIAAYTAALVSGTATAGWTFGAGAALQIPFAMQMAYRFNGIGVTQNVLYENQKQIANQFNKAISQIQESLTTTSTALGKLQDVVNQNAQALNTLVKQLSSNFGAISSVLNDILSRLDKVEAEVQIDRLITGRLQSLQTYVTQQLIRAAEIRASANLAATKMSECVLGQSKRVDFCGKGYHLMSFPQAAPHGVVFLHVTYVPSQERNFTTAPAICHEGKAYFPREGVFVFNGTSWFITQRNFFSPQIITTDNTFVSGNCDVVIGIINNTVYDPLQPELDSFKEELDKYFKNHTSPDVDLGDISGINASVVNIQKEIDRLNEVAKNLNESLIDLQELGKYEQYIKWPWYVWLGFIAGLIAIVMVTILLCCMTSCCSCLKGACSCGSCCKFDEDDSEPVLKGVKLHYT
+&gt;KF367457|WIV1|bat
+MKLLVLVFATLVSSYTIEKCLDFDDRTPPANTQFLSSHRGVYYPDDIFRSNVLHLVQDHFLPFDSNVTRFITFGLNFDNPIIPFKDGIYFAATEKSNVIRGWVFGSTMNNKSQSVIIMNNSTNLVIRACNFELCDNPFFVVLKSNNTQIPSYIFNNAFNCTFEYVSKDFNLDLGEKPGNFKDLREFVFRNKDGFLHVYSGYQPISAASGLPTGFNALKPIFKLPLGINITNFRTLLTAFPPRPDYWGTSAAAYFVGYLKPTTFMLKYDENGTITDAVDCSQNPLAELKCSVKSFEIDKGIYQTSNFRVAPSKEVVRFPNITNLCPFGEVFNATTFPSVYAWERKRISNCVADYSVLYNSTSFSTFKCYGVSATKLNDLCFSNVYADSFVVKGDDVRQIAPGQTGVIADYNYKLPDDFTGCVLAWNTRNIDATQTGNYNYKYRSLRHGKLRPFERDISNVPFSPDGKPCTPPAFNCYWPLNDYGFYITNGIGYQPYRVVVLSFELLNAPATVCGPKLSTDLIKNQCVNFNFNGLTGTGVLTPSSKRFQPFQQFGRDVSDFTDSVRDPKTSEILDISPCSFGGVSVITPGTNTSSEVAVLYQDVNCTDVPVAIHADQLTPSWRVHSTGNNVFQTQAGCLIGAEHVDTSYECDIPIGAGICASYHTVSSLRSTSQKSIVAYTMSLGADSSIAYSNNTIAIPTNFSISITTEVMPVSMAKTSVDCNMYICGDSTECANLLLQYGSFCTQLNRALSGIAVEQDRNTREVFAQVKQMYKTPTLKDFGGFNFSQILPDPLKPTKRSFIEDLLFNKVTLADAGFMKQYGECLGDINARDLICAQKFNGLTVLPPLLTDDMIAAYTAALVSGTATAGWTFGAGAALQIPFAMQMAYRFNGIGVTQNVLYENQKQIANQFNKAISQIQESLTTTSTALGKLQDVVNQNAQALNTLVKQLSSNFGAISSVLNDILSRLDKVEAEVQIDRLITGRLQSLQTYVTQQLIRAAEIRASANLAATKMSECVLGQSKRVDFCGKGYHLMSFPQAAPHGVVFLHVTYVPSQERNFTTAPAICHEGKAYFPREGVFVFNGTSWFITQRNFFSPQIITTDNTFVSGSCDVVIGIINNTVYDPLQPELDSFKEELDKYFKNHTSPDVDLGDISGINASVVNIQKEIDRLNEVAKNLNESLIDLQELGKYEQYIKWPWYVWLGFIAGLIAIVMVTILLCCMTSCCSCLKGACSCGSCCKFDEDDSEPVLKGVKLHYT
+</pre></div></div>
+</div>
+<p>We would like to align these Spike proteins to each and to the protein chains in a cryo-EM structure of the SARS-CoV Spike, <a class="reference external" href="https://www.rcsb.org/structure/6CRV">PDB 6crv</a>. That PDB structure is at <a class="reference external" href="input_files/6crv.pdb">input_files/6crv.pdb</a>, and has three chains (<code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code>, and <code class="docutils literal notranslate"><span class="pre">C</span></code>) each corresponding to monomers in the Spike trimer. Here are the first few lines of the PDB file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span> head -n <span class="m">8</span> input_files/6crv.pdb
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+HEADER    VIRAL PROTEIN                           19-MAR-18   6CRV
+TITLE     SARS SPIKE GLYCOPROTEIN, STABILIZED VARIANT, C3 SYMMETRY
+COMPND    MOL_ID: 1;
+COMPND   2 MOLECULE: SPIKE GLYCOPROTEIN,FIBRITIN;
+COMPND   3 CHAIN: A, B, C;
+COMPND   4 SYNONYM: S GLYCOPROTEIN,E2,PEPLOMER PROTEIN;
+COMPND   5 ENGINEERED: YES;
+COMPND   6 MUTATION: YES
+</pre></div></div>
+</div>
+<p>Finally, we need to choose a “reference” sequence in the alignment. All gaps in the alignment are stripped relative to this reference, and in addition to the PDB numbering we will get sites in the reference in 1, 2, … numbering. Since we are most interested in the 2019-nCoV from Wuhan, we will choose that as our reference sequence. It’s sequence header in <a class="reference external" href="input_files/beta_coronavirus_Spikes.fa">input_files/beta_coronavirus_Spikes.fa</a> contains the unique substring <code class="docutils literal notranslate"><span class="pre">Wuhan-CoV</span></code>, which we will
+use to identify it.</p>
+<p>Now we run <code class="docutils literal notranslate"><span class="pre">pdb_prot_align</span></code>, sending the output files to the subdirectory <code class="docutils literal notranslate"><span class="pre">./output_files/</span></code> (which needs to have already been created):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>! pdb_prot_align --protsfile input_files/beta_coronavirus_Spikes.fa \
+                 --refprot_regex Wuhan-CoV \
+                 --pdbfile input_files/6crv.pdb \
+                 --chain_ids A B C \
+                 --alignment output_files/beta_coronavirus_Spike_alignment.fa \
+                 --csv output_files/beta_coronavirus_Spike_stats.csv
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Running `pdb_prot_align` 0.1.0
+
+Parsing PDB input_files/6crv.pdb chains A B C
+Parsed sequence of 881 residues, ranging from 18 to 1120 in PDB numbering.
+
+Read 30 sequences from input_files/beta_coronavirus_Spikes.fa
+Reference protein is of length 1273 and has the following header:
+MN908947|Wuhan-CoV|human
+
+Using `mafft` to align sequences to output_files/beta_coronavirus_Spike_alignment_unstripped.fa
+Dropping PDB sequence PDB_6crv from alignment
+Stripping gaps relative to reference MN908947|Wuhan-CoV|human
+Writing gap-stripped alignment to output_files/beta_coronavirus_Spike_alignment.fa
+
+Writing CSV with detailed information to output_files/beta_coronavirus_Spike_stats.csv
+
+Program complete.
+
+</pre></div></div>
+</div>
+<p>The alignment output file (<a class="reference external" href="output_files/beta_coronavirus_Spike_alignment.fa">output_files/beta_coronavirus_Spike_alignment.fa</a>) has the Spike alignment with all gaps stripped relative to the reference sequence. It does <strong>not</strong> include the PDB protein (you can change that with the <code class="docutils literal notranslate"><span class="pre">--drop_pdb</span></code> option; also there is a file with the PDB and no gaps stripped at <a class="reference external" href="output_files/beta_coronavirus_Spike_alignment_unstripped.fa">output_files/beta_coronavirus_Spike_alignment_unstripped.fa</a>). Here
+are the first few lines:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span> head -n <span class="m">4</span> output_files/beta_coronavirus_Spike_alignment.fa
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&gt;AY278741|SARS Urbani|human
+MFIFLLFLTL--DRCTTFDDVQAPNYTQHTSSMRGVYYPDEIFRSDTLYLTQDLFLPFYSNVTGFHTINHT-------FGNPVIPFKDGIYFAATEKSNVVRGWVFGSTMNNKSQSVIIINNSTNVVIRACNFELCDNPFFAVSKPMGTQTHT----MIFDNAFNCTFEYISDAFSLDVSEKSGNFKHLREFVFKNKDGFLYVYKGYQPIDVVRDLPSGFNTLKPIFKLPLGINITNFRAILTAFS------PAQDIWGTSAAAYFVGYLKPTTFMLKYDENGTITDAVDCSQNPLAELKCSVKSFEIDKGIYQTSNFRVVPSGDVVRFPNITNLCPFGEVFNATKFPSVYAWERKKISNCVADYSVLYNSTFFSTFKCYGVSATKLNDLCFSNVYADSFVVKGDDVRQIAPGQTGVIADYNYKLPDDFMGCVLAWNTRNIDATSTGNYNYKYRYLRHGKLRPFERDISNVPFSPDGKPCTPP-ALNCYWPLNDYGFYTTTGIGYQPYRVVVLSFELLNAPATVCGPKLSTDLIKNQCVNFNFNGLTGTGVLTPSSKRFQPFQQFGRDVSDFTDSVRDPKTSEILDISPCSFGGVSVITPGTNASSEVAVLYQDVNCTDVSTAIHADQLTPAWRIYSTGNNVFQTQAGCLIGAEHVDTSYECDIPIGAGICASYHTVSL----LRSTSQKSIVAYTMSLGADSSIAYSNNTIAIPTNFSISITTEVMPVSMAKTSVDCNMYICGDSTECANLLLQYGSFCTQLNRALSGIAAEQDRNTREVFAQVKQMYKTPTLKYFGGFNFSQILPDPLKPTKRSFIEDLLFNKVTLADAGFMKQYGECLGDINARDLICAQKFNGLTVLPPLLTDDMIAAYTAALVSGTATAGWTFGAGAALQIPFAMQMAYRFNGIGVTQNVLYENQKQIANQFNKAISQIQESLTTTSTALGKLQDVVNQNAQALNTLVKQLSSNFGAISSVLNDILSRLDKVEAEVQIDRLITGRLQSLQTYVTQQLIRAAEIRASANLAATKMSECVLGQSKRVDFCGKGYHLMSFPQAAPHGVVFLHVTYVPSQERNFTTAPAICHEGKAYFPREGVFVFNGTSWFITQRNFFSPQIITTDNTFVSGNCDVVIGIINNTVYDPLQPELDSFKEELDKYFKNHTSPDVDLGDISGINASVVNIQKEIDRLNEVAKNLNESLIDLQELGKYEQYIKWPWYVWLGFIAGLIAIVMVTILLCCMTSCCSCLKGACSCGSCCKFDEDDSEPVLKGVKLHYT
+&gt;KF367457|WIV1|bat
+KLLVLVFATL--EKCLDFDDRTPPANTQFLSSHRGVYYPDDIFRSNVLHLVQDHFLPFDSNVTRFITFGLN-------FDNPIIPFKDGIYFAATEKSNVIRGWVFGSTMNNKSQSVIIMNNSTNLVIRACNFELCDNPFFVVLKSNNTQIPS----YIFNNAFNCTFEYVSKDFNLDLGEKPGNFKDLREFVFRNKDGFLHVYSGYQPISAASGLPTGFNALKPIFKLPLGINITNFRTLLTAFP------PRPDYWGTSAAAYFVGYLKPTTFMLKYDENGTITDAVDCSQNPLAELKCSVKSFEIDKGIYQTSNFRVAPSKEVVRFPNITNLCPFGEVFNATTFPSVYAWERKRISNCVADYSVLYNSTSFSTFKCYGVSATKLNDLCFSNVYADSFVVKGDDVRQIAPGQTGVIADYNYKLPDDFTGCVLAWNTRNIDATQTGNYNYKYRSLRHGKLRPFERDISNVPFSPDGKPCTPP-AFNCYWPLNDYGFYITNGIGYQPYRVVVLSFELLNAPATVCGPKLSTDLIKNQCVNFNFNGLTGTGVLTPSSKRFQPFQQFGRDVSDFTDSVRDPKTSEILDISPCSFGGVSVITPGTNTSSEVAVLYQDVNCTDVPVAIHADQLTPSWRVHSTGNNVFQTQAGCLIGAEHVDTSYECDIPIGAGICASYHTVSS----LRSTSQKSIVAYTMSLGADSSIAYSNNTIAIPTNFSISITTEVMPVSMAKTSVDCNMYICGDSTECANLLLQYGSFCTQLNRALSGIAVEQDRNTREVFAQVKQMYKTPTLKDFGGFNFSQILPDPLKPTKRSFIEDLLFNKVTLADAGFMKQYGECLGDINARDLICAQKFNGLTVLPPLLTDDMIAAYTAALVSGTATAGWTFGAGAALQIPFAMQMAYRFNGIGVTQNVLYENQKQIANQFNKAISQIQESLTTTSTALGKLQDVVNQNAQALNTLVKQLSSNFGAISSVLNDILSRLDKVEAEVQIDRLITGRLQSLQTYVTQQLIRAAEIRASANLAATKMSECVLGQSKRVDFCGKGYHLMSFPQAAPHGVVFLHVTYVPSQERNFTTAPAICHEGKAYFPREGVFVFNGTSWFITQRNFFSPQIITTDNTFVSGSCDVVIGIINNTVYDPLQPELDSFKEELDKYFKNHTSPDVDLGDISGINASVVNIQKEIDRLNEVAKNLNESLIDLQELGKYEQYIKWPWYVWLGFIAGLIAIVMVTILLCCMTSCCSCLKGACSCGSCCKFDEDDSEPVLKGVKLHYT
+</pre></div></div>
+</div>
+<p>However, the really “precious” information is in the output CSV file, <a class="reference external" href="output_files/beta_coronavirus_Spike_stats.csv">output_files/beta_coronavirus_Spike_stats.csv</a>. Here are the first few lines of that file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span> head output_files/beta_coronavirus_Spike_stats.csv
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+isite,pdb_site,wildtype,pdb_wildtype,entropy,n_effective,amino_acid,frequency
+1,,M,,1.26865,3.55604,A,0.00000
+1,,M,,1.26865,3.55604,C,0.00000
+1,,M,,1.26865,3.55604,D,0.00000
+1,,M,,1.26865,3.55604,E,0.00000
+1,,M,,1.26865,3.55604,F,0.03333
+1,,M,,1.26865,3.55604,G,0.00000
+1,,M,,1.26865,3.55604,H,0.00000
+1,,M,,1.26865,3.55604,I,0.40000
+1,,M,,1.26865,3.55604,K,0.13333
+</pre></div></div>
+</div>
+<p>You can see that it contains an <code class="docutils literal notranslate"><span class="pre">isite</span></code> column, which is 1, 2, … numbering of our reference sequence (in this case, the 2019-nCoV from Wuhan). Then there is a <code class="docutils literal notranslate"><span class="pre">pdb_site</span></code> column which gives the corresponding site number in the PDB (empty for the lines above since there isn’t any PDB structure for the first part of the protein). Then are the wildtype residues in the reference sequence and the PDB. Next there is evolutionary information for all sequences in the alignment (excluding the PDB, see
+the <code class="docutils literal notranslate"><span class="pre">--drop_pdb</span></code> option) in terms of the site entropy (in bits), the number of effective amino acids, and the frequency of each amino acid in tidy format. Gaps are not included in these calculations (see the <code class="docutils literal notranslate"><span class="pre">--ignore_gaps</span></code> option).</p>
+<p>Here are some lines more in the middle of the file, where there is PDB information:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="o">!</span> head -n <span class="m">2025</span> output_files/beta_coronavirus_Spike_stats.csv <span class="p">|</span> tail
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+101,98,I,V,0.71551,2.04524,R,0.00000
+101,98,I,V,0.71551,2.04524,S,0.00000
+101,98,I,V,0.71551,2.04524,T,0.00000
+101,98,I,V,0.71551,2.04524,V,0.26667
+101,98,I,V,0.71551,2.04524,W,0.00000
+101,98,I,V,0.71551,2.04524,Y,0.00000
+102,99,R,R,-0.00000,1.00000,A,0.00000
+102,99,R,R,-0.00000,1.00000,C,0.00000
+102,99,R,R,-0.00000,1.00000,D,0.00000
+102,99,R,R,-0.00000,1.00000,E,0.00000
+</pre></div></div>
+</div>
+<p>The information in this file are extremely useful if you want to plot evolutionary conservation or amino-acid identities onto the structure. But do that, you need to use a protein viewer such as <a class="reference external" href="https://pymol.org/">pymol</a> or <a class="reference external" href="http://nglviewer.org/nglview/latest/">nglview</a>.</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="examples.html">Examples</a><ul>
+      <li>Previous: <a href="examples.html" title="previous chapter">Examples</a></li>
+      <li>Next: <a href="pdb_prot_align.html" title="next chapter">pdb_prot_align package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/CoV_Spike.nblink.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

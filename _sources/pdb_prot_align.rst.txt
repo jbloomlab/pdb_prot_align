@@ -1,0 +1,15 @@
+pdb\_prot\_align package
+========================
+
+.. automodule:: pdb_prot_align
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   pdb_prot_align.main
+   pdb_prot_align.utils

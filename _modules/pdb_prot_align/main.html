@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pdb_prot_align.main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=======</span>
+<span class="sd">main</span>
+<span class="sd">=======</span>
+
+<span class="sd">Main PDB / protein alignment function.</span>
+
+<span class="sd">You can run all of the command-line functionality of ``pdb_prot_align`` via</span>
+<span class="sd">the :func:`run` function.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+
+<span class="kn">import</span> <span class="nn">Bio.AlignIO</span>
+<span class="kn">import</span> <span class="nn">Bio.Seq</span>
+<span class="kn">import</span> <span class="nn">Bio.SeqIO</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">import</span> <span class="nn">pdb_prot_align</span>
+<span class="kn">import</span> <span class="nn">pdb_prot_align.utils</span>
+
+
+<span class="k">def</span> <span class="nf">_run_main</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">()</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+    <span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="c1"># arguments for command-line parser, specified this way so can also</span>
+<span class="c1"># be used in docs for `run`</span>
+<span class="n">_ARGS</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="s1">&#39;protsfile&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;input FASTA file of protein sequences&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;refprot_regex&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;regex for reference protein header in `protsfile`&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;pdbfile&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;input PDB file&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;chain_ids&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;chains in PDB file, must be identical monomers if &gt; 1&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+              <span class="s1">&#39;nargs&#39;</span><span class="p">:</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;alignment&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;created FASTA alignment of proteins with gaps relative &#39;</span>
+                      <span class="s1">&#39;to reference are stripped; non-stripped alignment with &#39;</span>
+                      <span class="s1">&#39;PDB protein written to file with suffix &quot;_unstripped&quot;&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;csv&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;created CSV with sequential sites in reference, PDB &#39;</span>
+                      <span class="s1">&#39;sites, wildtype in reference, wildtype in PDB, amino &#39;</span>
+                      <span class="s1">&#39;amino acid, frequency of amino acid, site entropy in &#39;</span>
+                      <span class="s1">&#39;bits, number of effective amino acids at site&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;chain_identity&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+              <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;union&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;union&#39;</span><span class="p">,</span> <span class="s1">&#39;intersection&#39;</span><span class="p">,</span> <span class="s1">&#39;require_same&#39;</span><span class="p">],</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;if sites differ among chains, get union, intersection, &#39;</span>
+                      <span class="s1">&#39;or raise error if not same sites&#39;</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;ignore_gaps&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+              <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;ignore gaps (-) when calculating frequencies, number &#39;</span>
+                      <span class="s1">&#39;effective amino acids, entropy&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="s1">&#39;drop_pdb&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+              <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;drop protein in `pdbfile` from `alignment` and &#39;</span>
+                      <span class="s1">&#39;`csv` stats&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+              <span class="p">},</span>
+         <span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_parser"><a class="viewcode-back" href="../../pdb_prot_align.main.html#pdb_prot_align.main.get_parser">[docs]</a><span class="k">def</span> <span class="nf">get_parser</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Command-line `argparse.ArgumentParser` for ``pdb_prot_align``.&quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+                    <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Align proteins to reference and PDB.&#39;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span>
+                        <span class="n">version</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(prog)s</span><span class="s1"> </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">param_d</span> <span class="ow">in</span> <span class="n">_ARGS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--</span><span class="si">{param}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">param_d</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">parser</span></div>
+
+
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../../pdb_prot_align.main.html#pdb_prot_align.main.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">protsfile</span><span class="p">,</span>
+        <span class="n">refprot_regex</span><span class="p">,</span>
+        <span class="n">pdbfile</span><span class="p">,</span>
+        <span class="n">chain_ids</span><span class="p">,</span>
+        <span class="n">alignment</span><span class="p">,</span>
+        <span class="n">csv</span><span class="p">,</span>
+        <span class="n">chain_identity</span><span class="o">=</span><span class="s1">&#39;union&#39;</span><span class="p">,</span>
+        <span class="n">ignore_gaps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">drop_pdb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run main function to align proteins to reference and PDB chain(s).</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+<span class="sd">    This function implements the full command-line functionality of</span>
+<span class="sd">    ``pdb_prot_align`` via a Python function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    {_PARAM_DOCS}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Running `pdb_prot_align` </span><span class="si">{pdb_prot_align.__version__}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pdbfile</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no `pdbfile` of </span><span class="si">{pdbfile}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># parse PDB sequence into dataframe mapping sequential to PDB residues</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsing PDB </span><span class="si">{pdbfile}</span><span class="s2"> chains {&#39; &#39;.join(chain_ids)}&quot;</span><span class="p">)</span>
+    <span class="n">pdb_df</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">pdb_seq_to_number</span><span class="p">(</span><span class="n">pdbfile</span><span class="p">,</span>
+                                                    <span class="n">chain_ids</span><span class="p">,</span>
+                                                    <span class="n">chain_identity</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed sequence of {len(pdb_df)} residues, ranging &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{pdb_df[&#39;pdb_site&#39;].values[0]}</span><span class="s2"> to &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{pdb_df[&#39;pdb_site&#39;].values[-1]}</span><span class="s2"> in PDB numbering.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># make a BioPython SeqRecord with PDB protein</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;PDB_{os.path.splitext(os.path.basename(pdbfile))[0]}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pdb_df</span><span class="p">[</span><span class="s1">&#39;wildtype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pdb_prot</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_prot</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_df</span><span class="p">)</span>
+
+    <span class="c1"># read in all the proteins to align</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">protsfile</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no `protsfile` file </span><span class="si">{protsfile}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">prots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">protsfile</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read {len(prots)} sequences from </span><span class="si">{protsfile}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ensure no proteins have same header we used for PDB</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+           <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prots</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequences in </span><span class="si">{protsfile}</span><span class="s2"> cannot have header &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;{pdb_prot.description.strip()}&quot;</span><span class="p">)</span>
+
+    <span class="c1"># get reference protein from set of proteins</span>
+    <span class="n">refprot</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">prots</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">refprot_regex</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">description</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">refprot</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no headers in </span><span class="si">{protsfile}</span><span class="s2"> match `refprot_regex` &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{refprot_regex}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">refprot</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;multiple headers in </span><span class="si">{protsfile}</span><span class="s2"> match &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;`refprot_regex` </span><span class="si">{refprot_regex}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                         <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">description</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">refprot</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">refprot</span> <span class="o">=</span> <span class="n">refprot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reference protein is of length {len(refprot)} and has &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;the following header:</span><span class="se">\n</span><span class="si">{refprot.description}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># make alignment of all proteins and the PDB sequence</span>
+    <span class="n">base</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">alignment</span><span class="p">)</span>
+    <span class="n">alignment_unstripped</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{base}</span><span class="s2">_unstripped</span><span class="si">{ext}</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using `mafft` to align sequences to </span><span class="si">{alignment_unstripped}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">aln</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">align_prots_mafft</span><span class="p">(</span><span class="n">prots</span> <span class="o">+</span> <span class="p">[</span><span class="n">pdb_prot</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">Bio</span><span class="o">.</span><span class="n">AlignIO</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">aln</span><span class="p">,</span> <span class="n">alignment_unstripped</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+
+    <span class="c1"># get mapping of reference protein and PDB sequential sites</span>
+    <span class="n">ref_pdb_site_map</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">aligned_site_map</span><span class="p">(</span>
+                            <span class="n">aln</span><span class="p">,</span>
+                            <span class="p">[</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">],</span>
+                            <span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_pdb_site_map</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">description</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
+               <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pdb_prot</span><span class="p">,</span> <span class="n">refprot</span><span class="p">])</span>
+
+    <span class="c1"># remove PDB sequence?</span>
+    <span class="k">if</span> <span class="n">drop_pdb</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropping PDB sequence </span><span class="si">{pdb_prot.description}</span><span class="s2"> from alignment&quot;</span><span class="p">)</span>
+        <span class="n">aln</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">description</span> <span class="o">!=</span> <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span>
+
+    <span class="c1"># strip gaps relative to reference sequence</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stripping gaps relative to reference </span><span class="si">{refprot.description}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">aln</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">strip_gaps_to_ref</span><span class="p">(</span><span class="n">aln</span><span class="p">,</span>
+                                                 <span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">refprot</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing gap-stripped alignment to </span><span class="si">{alignment}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alignment</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{head}</span><span class="se">\n</span><span class="si">{s}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">))</span>
+
+    <span class="c1"># Create data frame that will become `csv` output.</span>
+    <span class="c1"># First get site numbers and wildtype.</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ref_pdb_site_map</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;isite&#39;</span><span class="p">,</span>
+                         <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;pdb_isite&#39;</span><span class="p">})</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">pdb_site</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">]</span>
+                                    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pdb_df</span>
+                                         <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
+                                         <span class="p">[</span><span class="s1">&#39;pdb_site&#39;</span><span class="p">]</span>
+                                         <span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+                                         <span class="n">na_action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+                                    <span class="p">),</span>
+                <span class="n">wildtype</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">]</span>
+                                    <span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">wt</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">wt</span> <span class="ow">in</span>
+                                          <span class="nb">enumerate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">refprot</span><span class="o">.</span><span class="n">seq</span><span class="p">))},</span>
+                                         <span class="n">na_action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+                                    <span class="p">),</span>
+                <span class="n">pdb_wildtype</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">]</span>
+                                        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pdb_df</span>
+                                             <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
+                                             <span class="p">[</span><span class="s1">&#39;wildtype&#39;</span><span class="p">]</span>
+                                             <span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+                                             <span class="n">na_action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+                                        <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="p">[[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">]]</span>
+        <span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">alignment_to_count_df</span><span class="p">(</span>
+                                            <span class="n">alignment</span><span class="p">,</span>
+                                            <span class="n">ignore_gaps</span><span class="o">=</span><span class="n">ignore_gaps</span><span class="p">,</span>
+                                            <span class="n">as_freqs</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+               <span class="n">on</span><span class="o">=</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span>
+               <span class="n">validate</span><span class="o">=</span><span class="s1">&#39;one_to_one&#39;</span><span class="p">,</span>
+               <span class="p">)</span>
+        <span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+            <span class="n">entropy</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="o">-</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
+                                                  <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+                                      <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">n_effective</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;entropy&#39;</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;entropy&#39;</span><span class="p">,</span> <span class="s1">&#39;n_effective&#39;</span><span class="p">],</span>
+              <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;amino_acid&#39;</span><span class="p">,</span>
+              <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span>
+              <span class="p">)</span>
+        <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;amino_acid&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing CSV with detailed information to </span><span class="si">{csv}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.5f</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Program complete.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># complete docs for `run` with parameter specs parsed from `_ARGS`</span>
+<span class="n">_PARAM_DOCS</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">param_d</span> <span class="ow">in</span> <span class="n">_ARGS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;choices&#39;</span> <span class="ow">in</span> <span class="n">param_d</span><span class="p">:</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;{{{&#39;, &#39;.join(param_d[&#39;choices&#39;])}}}&quot;</span>
+    <span class="k">elif</span> <span class="s1">&#39;nargs&#39;</span> <span class="ow">in</span> <span class="n">param_d</span> <span class="ow">and</span> <span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;nargs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="s1">&#39;list&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="n">param_help</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;help&#39;</span><span class="p">],</span> <span class="mi">70</span><span class="p">)),</span>
+                                 <span class="s1">&#39;        &#39;</span><span class="p">)</span>
+    <span class="n">_PARAM_DOCS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{param}</span><span class="s2"> : </span><span class="si">{param_type}</span><span class="se">\n</span><span class="si">{param_help}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">_PARAM_DOCS</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_PARAM_DOCS</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">param</span><span class="p">,</span> <span class="n">param_d</span><span class="p">,</span> <span class="n">param_type</span><span class="p">,</span> <span class="n">param_help</span>
+
+<span class="c1"># add parameter specs to docs for `run`</span>
+<span class="n">run</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_PARAM_DOCS</span><span class="o">=</span><span class="n">_PARAM_DOCS</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

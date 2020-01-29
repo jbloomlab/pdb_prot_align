@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Command-line interface &#8212; pdb_prot_align 0.1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="command-line-interface">
+<span id="cli"></span><h1>Command-line interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h1>
+<p>The easiest way to use <code class="docutils literal notranslate"><span class="pre">pdb_prot_align</span></code> is typically via the command-line executable that will be installed with the package.
+See below for usage.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p><p>Align proteins to reference and PDB.</p>
+</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">pdb_prot_align</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">v</span><span class="p">]</span> <span class="o">--</span><span class="n">protsfile</span> <span class="n">PROTSFILE</span> <span class="o">--</span><span class="n">refprot_regex</span>
+                      <span class="n">REFPROT_REGEX</span> <span class="o">--</span><span class="n">pdbfile</span> <span class="n">PDBFILE</span> <span class="o">--</span><span class="n">chain_ids</span> <span class="n">CHAIN_IDS</span>
+                      <span class="p">[</span><span class="n">CHAIN_IDS</span> <span class="o">...</span><span class="p">]</span> <span class="o">--</span><span class="n">alignment</span> <span class="n">ALIGNMENT</span> <span class="o">--</span><span class="n">csv</span> <span class="n">CSV</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">chain_identity</span> <span class="p">{</span><span class="n">union</span><span class="p">,</span><span class="n">intersection</span><span class="p">,</span><span class="n">require_same</span><span class="p">}]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">ignore_gaps</span> <span class="n">IGNORE_GAPS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">drop_pdb</span> <span class="n">DROP_PDB</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="Named Arguments">
+<h3>Named Arguments<a class="headerlink" href="#Named Arguments" title="Permalink to this headline">¶</a></h3>
+<dl class="option-list">
+<dt><kbd>-v, --version</kbd></dt>
+<dd><p>show program’s version number and exit</p>
+</dd>
+<dt><kbd>--protsfile</kbd></dt>
+<dd><p>input FASTA file of protein sequences</p>
+</dd>
+<dt><kbd>--refprot_regex</kbd></dt>
+<dd><p>regex for reference protein header in <cite>protsfile</cite></p>
+</dd>
+<dt><kbd>--pdbfile</kbd></dt>
+<dd><p>input PDB file</p>
+</dd>
+<dt><kbd>--chain_ids</kbd></dt>
+<dd><p>chains in PDB file, must be identical monomers if &gt; 1</p>
+</dd>
+<dt><kbd>--alignment</kbd></dt>
+<dd><p>created FASTA alignment of proteins with gaps relative to reference are stripped; non-stripped alignment with PDB protein written to file with suffix “_unstripped”</p>
+</dd>
+<dt><kbd>--csv</kbd></dt>
+<dd><p>created CSV with sequential sites in reference, PDB sites, wildtype in reference, wildtype in PDB, amino amino acid, frequency of amino acid, site entropy in bits, number of effective amino acids at site</p>
+</dd>
+<dt><kbd>--chain_identity</kbd></dt>
+<dd><p>Possible choices: union, intersection, require_same</p>
+<p>if sites differ among chains, get union, intersection, or raise error if not same sites</p>
+<p>Default: “union”</p>
+</dd>
+<dt><kbd>--ignore_gaps</kbd></dt>
+<dd><p>ignore gaps (-) when calculating frequencies, number effective amino acids, entropy</p>
+<p>Default: True</p>
+</dd>
+<dt><kbd>--drop_pdb</kbd></dt>
+<dd><p>drop protein in <cite>pdbfile</cite> from <cite>alignment</cite> and <cite>csv</cite> stats</p>
+<p>Default: True</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="previous chapter">Installation</a></li>
+      <li>Next: <a href="examples.html" title="next chapter">Examples</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/cli.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,4 @@
+.. automodule:: pdb_prot_align.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
