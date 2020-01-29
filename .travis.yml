@@ -3,8 +3,7 @@ dist: xenial
 language: python
 
 python:
-  - "3.6"
-  - "3.7"
+  - "3.7"  # note that version really set in `environment.yml` though
 
 cache: pip
 
@@ -16,7 +15,7 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda env create -f environment.yml python=$TRAVIS_PYTHON_VERSION
+  - conda env create -f environment.yml
   - conda activate pdb_prot_align
 
 install:
