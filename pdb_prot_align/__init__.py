@@ -3,6 +3,8 @@
 pdb_prot_align
 ================================
 
+Python interface to ``pdb_prot_align``.
+
 """
 
 __author__ = '`the Bloom lab <https://research.fhcrc.org/bloom/en.html>`_'

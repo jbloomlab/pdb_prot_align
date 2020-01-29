@@ -1,4 +1,11 @@
-"""Utilities for aligning proteins to PDB."""
+"""
+=====
+utils
+=====
+
+Utilities for aligning proteins to PDB.
+
+"""
 
 
 import collections

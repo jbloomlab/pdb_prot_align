@@ -42,6 +42,7 @@ extensions = [
         'sphinx.ext.githubpages',
         'sphinx.ext.viewcode',
         'sphinx.ext.napoleon',
+        'sphinxarg.ext',
         'matplotlib.sphinxext.plot_directive',
         'nbsphinx',
         'nbsphinx_link',
