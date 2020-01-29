@@ -20,4 +20,6 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	$(SPHINXAPIDOC) -E -T -M -e -f -o . $(PYTHONAPISRC)
+	cp -r ../notebooks/input_files .  # copy files for notebook examples
+	cp -r ../notebooks/output_files .  # copy files for notebook examples
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
