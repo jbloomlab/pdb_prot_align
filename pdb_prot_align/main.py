@@ -141,8 +141,8 @@ def run(protsfile,
         raise IOError(f"no `pdbfile` of {pdbfile}")
 
     # make output directory(ies) if they do not already exist
-    for dir in set([os.path.dirname(alignment), os.path.dirname(alignment)]):
-        os.makedirs(dir, exist_ok=True)
+    for d in set([os.path.dirname(alignment), os.path.dirname(alignment)]):
+        os.makedirs(d, exist_ok=True)
 
     # parse PDB sequence into dataframe mapping sequential to PDB residues
     print(f"Parsing PDB {pdbfile} chains {' '.join(chain_ids)}")
