@@ -53,7 +53,7 @@ setup(
     install_requires=[
             'biopython>=1.74',
             'natsort>=6.0.0',
-            'pandas>=0.25.3',
+            'pandas>=0.25.3,<1.0',
             ],
     platforms='Linux and Mac OS X.',
     packages=['pdb_prot_align'],
