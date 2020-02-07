@@ -19,6 +19,8 @@ Added
 
 * Added the ``colorschemes`` module.
 
+* Added ``pymol_struct`` module to color ``pymol`` structures.
+
 Fixed
 +++++
 * Made ``--drop_pdb`` and ``--ignore_gaps`` options work correctly (before they did nothing due to command-line parsing error)
