@@ -278,8 +278,11 @@ def run(protsfile,
                                                       [r.pdb_chain,
                                                        r.pdb_isite]
                                                       ),
-                                           axis=1)
+                                           axis=1),
+            nchains=lambda x: x.groupby('isite').pdb_chain.transform('count')
             )
+        .query('(pdb_chain != "NaN") or (nchains == 1)')
+        .reset_index(drop=True)
         .replace({'NaN': float('nan')})
         [['isite', 'wildtype', 'pdb_chain', 'pdb_site', 'pdb_wildtype']]
         )
