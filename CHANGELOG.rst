@@ -21,6 +21,8 @@ Fixed
 +++++
 * Made ``--drop_pdb`` and ``--ignore_gaps`` options work correctly (before they did nothing due to command-line parsing error)
 
+* Allow ``pandas`` >= 1.0
+
 0.1.1
 -----
 

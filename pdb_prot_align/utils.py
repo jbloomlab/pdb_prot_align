@@ -248,6 +248,8 @@ def aligned_site_map(aln, heads):
 
     Example
     -------
+    Create and parse an alignment:
+
     >>> with tempfile.TemporaryFile('w+') as f:
     ...     _ = f.write(textwrap.dedent(
     ...             '''
@@ -264,11 +266,17 @@ def aligned_site_map(aln, heads):
     ...     f.flush()
     ...     _ = f.seek(0)
     ...     aln = Bio.AlignIO.read(f, 'fasta')
-    >>> aligned_site_map(aln, ['seq1', 'seq2', 'seq3'])
+
+    Show the alignment site map. The gymnastics with converting to str and
+    replacing 'nan' are to make output format the same in both `pandas`
+    >= and < 1.0 and earlier versions so doctest passes in both:
+
+    >>> (aligned_site_map(aln, ['seq1', 'seq2', 'seq3'])
+    ...  .astype(str).replace('nan', '<NA>'))
        seq1  seq2  seq3
-    0     1   NaN     1
-    1     2     1   NaN
-    2   NaN   NaN     2
+    0     1  <NA>     1
+    1     2     1  <NA>
+    2  <NA>  <NA>     2
     3     3     2     3
     4     4     3     4
     5     5     4     5
