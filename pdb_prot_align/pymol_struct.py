@@ -3,7 +3,7 @@
 pymol_struct
 ============
 
-Utilities for `pymol https://pymol.org/>` structures.
+Utilities for `pymol <https://pymol.org/>` structures.
 
 """
 
