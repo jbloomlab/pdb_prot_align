@@ -5,12 +5,16 @@ name: pdb_prot_align
 channels:
   - conda-forge
   - bioconda
+  - schrodinger
 
 # conda dependencies
 dependencies:
   - python=3.7
   - pip
   - mafft=7.407
+  - jupyter
+  - jupyterlab
+  - pymol
   # list packages to install with pip
   - pip:
-    - .
+    - -e .
