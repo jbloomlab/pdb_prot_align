@@ -15,6 +15,7 @@ dependencies:
   - jupyter
   - jupyterlab
   - pymol
+  - nglview
   # list packages to install with pip
   - pip:
     - -e .
