@@ -9,24 +9,29 @@ structures.
 """
 
 
+import nglview
+
 import pandas as pd
 
 import pdb_prot_align.colorschemes
 
 
-def color_by_site(cmd,
-                  sites_df,
-                  color_by,
-                  pymol_object=None,
-                  ):
-    """Color residues in a ``pymol`` object by site.
+def colorscheme_by_site(colorscheme_name,
+                        sites_df,
+                        color_by,
+                        ):
+    """Add a color scheme to the color registry.
+
+    The scheme can then be added to a `ngview.widget.NGLWidget` as described
+    `here <https://github.com/dwhswenson/contact_map/pull/62>`_. For instance::
+
+        view.add_cartoon(color=colorscheme_name)
+
 
     Parameters
     ----------
-    cmd : pymol.cmd module
-        Name of `pymol.cmd` module for current session, typically imported
-        with ``import pymol.cmd as cmd``. The structure(s) must already be
-        loaded into this session.
+    colorscheme_name : str
+        Name of the color scheme.
     sites_df : pandas.DataFrame or str
         Information on how to color sites. Can either be data frame or name
         of CSV file with data frame. Must have columns named 'pdb_chain'
@@ -38,11 +43,7 @@ def color_by_site(cmd,
         `val_col` is name of column with numerical values, and `color_map`
         is a :class:`pdb_prot_align.colorschemes.ValueToColorMap` that maps
         the numbers in this column to colors. If colors are specified as
-        str and are hex, then they need to be like this '0x25828e', not like
-        this '#25828e'
-    pymol_object : None or str
-        Name of pymol object to which chains and sites belong. If `None`,
-        color all residues in current session with specified chains / sites.
+        str and are hex, then they need to be like this '#25828e'.
 
     """
     site_col = 'pdb_site'
@@ -97,17 +98,17 @@ def color_by_site(cmd,
     if len(dups):
         raise ValueError('non-unique colors for some sites:\n' + str(dups))
 
-    # do the coloring
-    if pymol_object:
-        object_sel = f"{pymol_object} and "
-    else:
-        object_sel = ''
+    # Do the coloring; details on selection schemes:
+    # https://github.com/arose/ngl/blob/master/doc/usage/selection-language.md
+    colorscheme = []
     for tup in sites_df.itertuples():
         chain = getattr(tup, chain_col)
         resi = getattr(tup, site_col)
-        sel_str = f"{object_sel}chain {chain} and resi {resi}"
-        color = getattr(tup, color_col).replace('#', '0x')
-        cmd.color(color, sel_str)
+        sel_str = f":{chain} and {resi}"
+        color = getattr(tup, color_col)
+        colorscheme.append([color, sel_str])
+
+    nglview.color.ColormakerRegistry.add_scheme(colorscheme_name, colorscheme)
 
 
 if __name__ == '__main__':
