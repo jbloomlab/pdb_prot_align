@@ -21,6 +21,8 @@ Added
 
 * Added ``pymol_struct`` module to color ``pymol`` structures.
 
+* Added ``nglview_struct`` module to color ``nglview`` structures.
+
 Fixed
 +++++
 * Made ``--drop_pdb`` and ``--ignore_gaps`` options work correctly (before they did nothing due to command-line parsing error)
