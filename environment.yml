@@ -15,6 +15,9 @@ dependencies:
   - jupyter
   - jupyterlab
   - pymol
+  - jupyter_nbextensions_configurator
+  - conda-forge::nglview
+  - nodejs
   # list packages to install with pip
   - pip:
     - -e .
