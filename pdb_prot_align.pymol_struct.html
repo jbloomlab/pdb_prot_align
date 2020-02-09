@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pymol_struct &#8212; pdb_prot_align 0.2.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="utils" href="pdb_prot_align.utils.html" />
+    <link rel="prev" title="nglview_struct" href="pdb_prot_align.nglview_struct.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-pdb_prot_align.pymol_struct"></span><div class="section" id="pymol-struct">
+<h1>pymol_struct<a class="headerlink" href="#pymol-struct" title="Permalink to this headline">¶</a></h1>
+<p>Utilities for <cite>pymol &lt;https://pymol.org/&gt;</cite> structures.</p>
+<dl class="function">
+<dt id="pdb_prot_align.pymol_struct.color_by_site">
+<code class="sig-prename descclassname">pdb_prot_align.pymol_struct.</code><code class="sig-name descname">color_by_site</code><span class="sig-paren">(</span><em class="sig-param">cmd</em>, <em class="sig-param">sites_df</em>, <em class="sig-param">color_by</em>, <em class="sig-param">pymol_object=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/pymol_struct.html#color_by_site"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.pymol_struct.color_by_site" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color residues in a <code class="docutils literal notranslate"><span class="pre">pymol</span></code> object by site.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> (<em>pymol.cmd module</em>) – Name of <cite>pymol.cmd</cite> module for current session, typically imported
+with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pymol.cmd</span> <span class="pre">as</span> <span class="pre">cmd</span></code>. The structure(s) must already be
+loaded into this session.</p></li>
+<li><p><strong>sites_df</strong> (<em>pandas.DataFrame</em><em> or </em><em>str</em>) – Information on how to color sites. Can either be data frame or name
+of CSV file with data frame. Must have columns named ‘pdb_chain’
+and ‘pdb_site’ as well as the column specified by <cite>color_by</cite>.</p></li>
+<li><p><strong>color_by</strong> (<em>str</em><em> or </em><em>2-tuple</em>) – How to color the sites. Can either specify as a str the name of
+a column in <cite>sites_df</cite> that has the name of a color for each site,
+or can be the 2-tuple <cite>(val_col, color_map)</cite>. In this case,
+<cite>val_col</cite> is name of column with numerical values, and <cite>color_map</cite>
+is a <a class="reference internal" href="pdb_prot_align.colorschemes.html#pdb_prot_align.colorschemes.ValueToColorMap" title="pdb_prot_align.colorschemes.ValueToColorMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">pdb_prot_align.colorschemes.ValueToColorMap</span></code></a> that maps
+the numbers in this column to colors. If colors are specified as
+str and are hex, then they need to be like this ‘0x25828e’, not like
+this ‘#25828e’</p></li>
+<li><p><strong>pymol_object</strong> (<em>None</em><em> or </em><em>str</em>) – Name of pymol object to which chains and sites belong. If <cite>None</cite>,
+color all residues in current session with specified chains / sites.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pdb_prot_align.html">pdb_prot_align package</a><ul>
+      <li>Previous: <a href="pdb_prot_align.nglview_struct.html" title="previous chapter">nglview_struct</a></li>
+      <li>Next: <a href="pdb_prot_align.utils.html" title="next chapter">utils</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/pdb_prot_align.pymol_struct.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

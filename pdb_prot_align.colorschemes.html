@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>colorschemes &#8212; pdb_prot_align 0.2.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="main" href="pdb_prot_align.main.html" />
+    <link rel="prev" title="pdb_prot_align package" href="pdb_prot_align.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-pdb_prot_align.colorschemes"></span><div class="section" id="colorschemes">
+<h1>colorschemes<a class="headerlink" href="#colorschemes" title="Permalink to this headline">¶</a></h1>
+<p>Color schemes and gradients.</p>
+<dl class="data">
+<dt id="pdb_prot_align.colorschemes.CBBPALETTE">
+<code class="sig-prename descclassname">pdb_prot_align.colorschemes.</code><code class="sig-name descname">CBBPALETTE</code><em class="property"> = ('#000000', '#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7')</em><a class="headerlink" href="#pdb_prot_align.colorschemes.CBBPALETTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>color-blind safe palette with black.</p>
+<p>From <a class="reference external" href="http://bconnelly.net/2013/10/creating-colorblind-friendly-figures">http://bconnelly.net/2013/10/creating-colorblind-friendly-figures</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="data">
+<dt id="pdb_prot_align.colorschemes.CBPALETTE">
+<code class="sig-prename descclassname">pdb_prot_align.colorschemes.</code><code class="sig-name descname">CBPALETTE</code><em class="property"> = ('#999999', '#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7')</em><a class="headerlink" href="#pdb_prot_align.colorschemes.CBPALETTE" title="Permalink to this definition">¶</a></dt>
+<dd><p>color-blind safe palette with gray.</p>
+<p>From <a class="reference external" href="http://bconnelly.net/2013/10/creating-colorblind-friendly-figures">http://bconnelly.net/2013/10/creating-colorblind-friendly-figures</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="pdb_prot_align.colorschemes.ValueToColorMap">
+<em class="property">class </em><code class="sig-prename descclassname">pdb_prot_align.colorschemes.</code><code class="sig-name descname">ValueToColorMap</code><span class="sig-paren">(</span><em class="sig-param">minvalue</em>, <em class="sig-param">maxvalue</em>, <em class="sig-param">cmap='viridis'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/colorschemes.html#ValueToColorMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.colorschemes.ValueToColorMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Map numerical values to color gradient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minvalue</strong> (<em>float</em>) – Color map starts at this value.</p></li>
+<li><p><strong>maxvalue</strong> (<em>float</em>) – Color map ends at this value.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib.colors.Colormap</em>) – Name of <a class="reference external" href="https://matplotlib.org/tutorials/colors/colormaps.html">matplotlib colormap</a>, or an actual <cite>Colormap</cite> object. You
+can also use the wider set of color maps from <a class="reference external" href="https://jiffyclub.github.io/palettable/">palettable</a>, such as
+by providing <cite>palettable.sequential.cmocean.Dense_20.mpl_colormap</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="pdb_prot_align.colorschemes.ValueToColorMap.cmap">
+<code class="sig-name descname">cmap</code><a class="headerlink" href="#pdb_prot_align.colorschemes.ValueToColorMap.cmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>matplotlib.colors.Colormap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pdb_prot_align.colorschemes.ValueToColorMap.minvalue">
+<code class="sig-name descname">minvalue</code><a class="headerlink" href="#pdb_prot_align.colorschemes.ValueToColorMap.minvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color map starts at this value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pdb_prot_align.colorschemes.ValueToColorMap.maxvalue">
+<code class="sig-name descname">maxvalue</code><a class="headerlink" href="#pdb_prot_align.colorschemes.ValueToColorMap.maxvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Color map ends at this value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<p>Make a data frame with some values, and two color maps (one with default
+‘viridis’ and another with ‘cividis’) covering value range in data frame:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pdb_prot_align.colorschemes</span> <span class="kn">import</span> <span class="n">ValueToColorMap</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">map1</span> <span class="o">=</span> <span class="n">ValueToColorMap</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+<span class="gp">... </span>                       <span class="n">df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">map2</span> <span class="o">=</span> <span class="n">ValueToColorMap</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+<span class="gp">... </span>                       <span class="n">df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+<span class="gp">... </span>                       <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;cividis&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Map values to colors using <a class="reference internal" href="#pdb_prot_align.colorschemes.ValueToColorMap.val_to_color" title="pdb_prot_align.colorschemes.ValueToColorMap.val_to_color"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ValueToColorMap.val_to_color()</span></code></a>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span>
+<span class="gp">... </span>      <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map1</span><span class="o">.</span><span class="n">val_to_color</span><span class="p">),</span>
+<span class="gp">... </span>              <span class="n">color2</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map2</span><span class="o">.</span><span class="n">val_to_color</span><span class="p">),</span>
+<span class="gp">... </span>              <span class="p">)</span>
+<span class="gp">... </span>      <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">   value    color   color2</span>
+<span class="go">0      0  #440154  #00224d</span>
+<span class="go">1      1  #30678d  #575d6d</span>
+<span class="go">2      2  #35b778  #a59b73</span>
+<span class="go">3      1  #30678d  #575d6d</span>
+<span class="go">4      3  #fde724  #fde737</span>
+<span class="go">5      0  #440154  #00224d</span>
+</pre></div>
+</div>
+<p>Draw scale bars:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">map1</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;viridis scale&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//pdb_prot_align-colorschemes-3.png">png</a>, <a class="reference external" href=".//pdb_prot_align-colorschemes-3.hires.png">hires.png</a>, <a class="reference external" href=".//pdb_prot_align-colorschemes-3.pdf">pdf</a>)</p>
+<div class="figure align-default">
+<img alt="_images/pdb_prot_align-colorschemes-3.png" src="_images/pdb_prot_align-colorschemes-3.png" />
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">map2</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cividis scale&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(<a class="reference external" href=".//pdb_prot_align-colorschemes-4.png">png</a>, <a class="reference external" href=".//pdb_prot_align-colorschemes-4.hires.png">hires.png</a>, <a class="reference external" href=".//pdb_prot_align-colorschemes-4.pdf">pdf</a>)</p>
+<div class="figure align-default">
+<img alt="_images/pdb_prot_align-colorschemes-4.png" src="_images/pdb_prot_align-colorschemes-4.png" />
+</div>
+<dl class="method">
+<dt id="pdb_prot_align.colorschemes.ValueToColorMap.scale_bar">
+<code class="sig-name descname">scale_bar</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">orientation='vertical'</em>, <em class="sig-param">ax=None</em>, <em class="sig-param">label=None</em>, <em class="sig-param">axisfontscale=1</em>, <em class="sig-param">low_high_ticks_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/colorschemes.html#ValueToColorMap.scale_bar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.colorschemes.ValueToColorMap.scale_bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a scale bar for the value-to-color map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orientation</strong> (<em>{'horizontal'</em><em>, </em><em>'vertical'}</em>) – Direction that scale bar drawn is drawn.</p></li>
+<li><p><strong>ax</strong> (<em>None</em><em> or </em><em>matplotlib.axes.Axes</em>) – If specified, draw scale bar on this axis. Otherwise create
+new axes.</p></li>
+<li><p><strong>label</strong> (<em>None</em><em> or </em><em>str</em>) – Label for scale bar.</p></li>
+<li><p><strong>axisfontscale</strong> (<em>float</em>) – Scale font size by this much.</p></li>
+<li><p><strong>low_high_ticks_only</strong> (<em>bool</em>) – Rather than showing numerical ticks, just indicate low and high.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Figure and axis on which the color bar is drawn.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(matplotlib.figure.Figure, matplotlib.axes.Axes)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pdb_prot_align.colorschemes.ValueToColorMap.val_to_color">
+<code class="sig-name descname">val_to_color</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">*</em>, <em class="sig-param">return_color_as='rgb_hex_code'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/colorschemes.html#ValueToColorMap.val_to_color"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.colorschemes.ValueToColorMap.val_to_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map numerical values between <cite>minvalue</cite> and <cite>maxvalue</cite> to colors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>number</em><em> or </em><em>array-like of numbers</em>) – Values to map to colors</p></li>
+<li><p><strong>return_color_as</strong> (<em>{'rgb_hex_code'</em><em>, </em><em>'rgb_triple'}</em>) – Return color as RGB hex code (e.g., <cite>‘#FF0000’</cite>) or triple of
+numbers (e.g., <cite>[255, 0, 0]</cite>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Either str or length-3 arrays depending on <cite>return_color_as</cite>.
+If <cite>values</cite> is single value, return single value; otherwise array.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>single str or length-3 numpy array, or array of them</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pdb_prot_align.html">pdb_prot_align package</a><ul>
+      <li>Previous: <a href="pdb_prot_align.html" title="previous chapter">pdb_prot_align package</a></li>
+      <li>Next: <a href="pdb_prot_align.main.html" title="next chapter">main</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/pdb_prot_align.colorschemes.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

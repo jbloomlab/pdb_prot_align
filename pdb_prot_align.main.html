@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>main &#8212; pdb_prot_align 0.1.0 documentation</title>
+    <title>main &#8212; pdb_prot_align 0.2.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -12,10 +12,11 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="utils" href="pdb_prot_align.utils.html" />
-    <link rel="prev" title="pdb_prot_align package" href="pdb_prot_align.html" />
+    <link rel="next" title="nglview_struct" href="pdb_prot_align.nglview_struct.html" />
+    <link rel="prev" title="colorschemes" href="pdb_prot_align.colorschemes.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -45,7 +46,7 @@ the <a class="reference internal" href="#pdb_prot_align.main.run" title="pdb_pro
 
 <dl class="function">
 <dt id="pdb_prot_align.main.run">
-<code class="sig-prename descclassname">pdb_prot_align.main.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">protsfile</em>, <em class="sig-param">refprot_regex</em>, <em class="sig-param">pdbfile</em>, <em class="sig-param">chain_ids</em>, <em class="sig-param">alignment</em>, <em class="sig-param">csv</em>, <em class="sig-param">chain_identity='union'</em>, <em class="sig-param">ignore_gaps=True</em>, <em class="sig-param">drop_pdb=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/main.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.main.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pdb_prot_align.main.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">protsfile</em>, <em class="sig-param">refprot_regex</em>, <em class="sig-param">pdbfile</em>, <em class="sig-param">chain_ids</em>, <em class="sig-param">outprefix</em>, <em class="sig-param">ignore_gaps=True</em>, <em class="sig-param">drop_pdb=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/main.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.main.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run main function to align proteins to reference and PDB chain(s).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -58,18 +59,19 @@ the <a class="reference internal" href="#pdb_prot_align.main.run" title="pdb_pro
 <li><p><strong>protsfile</strong> (<em>str</em>) – input FASTA file of protein sequences</p></li>
 <li><p><strong>refprot_regex</strong> (<em>str</em>) – regex for reference protein header in <cite>protsfile</cite></p></li>
 <li><p><strong>pdbfile</strong> (<em>str</em>) – input PDB file</p></li>
-<li><p><strong>chain_ids</strong> (<em>list</em>) – chains in PDB file, must be identical monomers if &gt; 1</p></li>
-<li><p><strong>alignment</strong> (<em>str</em>) – created FASTA alignment of proteins with gaps relative to reference
-are stripped; non-stripped alignment with PDB protein written to file
-with suffix “_unstripped”</p></li>
-<li><p><strong>csv</strong> (<em>str</em>) – created CSV with sequential sites in reference, PDB sites, wildtype in
-reference, wildtype in PDB, amino amino acid, frequency of amino acid,
-site entropy in bits, number of effective amino acids at site</p></li>
-<li><p><strong>chain_identity</strong> (<em>{union</em><em>, </em><em>intersection</em><em>, </em><em>require_same}</em>) – if sites differ among chains, get union, intersection, or raise error
-if not same sites</p></li>
+<li><p><strong>chain_ids</strong> (<em>list</em>) – chains in PDB file to align; all chains aligning to a site must share
+the same residue number and amino-acid or an error will be raised</p></li>
+<li><p><strong>outprefix</strong> (<em>str</em>) – prefix for output files (can be / include directory): “alignment.fa”
+(alignment with gaps relative to reference stripped);
+“alignment_unstripped.fa” (non-stripped alignment with PDB chains
+still included); “sites.csv” (sequential sites in reference, PDB
+sites, PDB chains, wildtype in reference, wildtype in PDB, site
+entropy in bits, n effective amino acids at site, amino acid,
+frequency of amino acid)</p></li>
 <li><p><strong>ignore_gaps</strong> (<em>bool</em>) – ignore gaps (-) when calculating frequencies, number effective amino
 acids, entropy</p></li>
-<li><p><strong>drop_pdb</strong> (<em>bool</em>) – drop protein in <cite>pdbfile</cite> from <cite>alignment</cite> and <cite>csv</cite> stats</p></li>
+<li><p><strong>drop_pdb</strong> (<em>bool</em>) – drop PDB protein chains from “alignment.fa” and computation of stats
+in “sites.csv” output files</p></li>
 </ul>
 </dd>
 </dl>
@@ -139,8 +141,8 @@ acids, entropy</p></li>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
   <li><a href="pdb_prot_align.html">pdb_prot_align package</a><ul>
-      <li>Previous: <a href="pdb_prot_align.html" title="previous chapter">pdb_prot_align package</a></li>
-      <li>Next: <a href="pdb_prot_align.utils.html" title="next chapter">utils</a></li>
+      <li>Previous: <a href="pdb_prot_align.colorschemes.html" title="previous chapter">colorschemes</a></li>
+      <li>Next: <a href="pdb_prot_align.nglview_struct.html" title="next chapter">nglview_struct</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -171,7 +173,7 @@ acids, entropy</p></li>
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

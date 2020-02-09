@@ -1,0 +1,4 @@
+.. automodule:: pdb_prot_align.colorschemes
+   :members:
+   :undoc-members:
+   :show-inheritance:

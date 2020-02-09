@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.1.0 documentation</title>
+    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.2.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -12,6 +12,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -55,7 +56,7 @@
 <span class="kn">import</span> <span class="nn">Bio.Seq</span>
 <span class="kn">import</span> <span class="nn">Bio.SeqIO</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">pdb_prot_align</span>
 <span class="kn">import</span> <span class="nn">pdb_prot_align.utils</span>
@@ -65,6 +66,18 @@
     <span class="n">parser</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">()</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
     <span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_str2bool</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert string to boolean value.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">v</span>
+    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;yes&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;no&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentTypeError</span><span class="p">(</span><span class="s1">&#39;Boolean value expected.&#39;</span><span class="p">)</span>
 
 
 <span class="c1"># arguments for command-line parser, specified this way so can also</span>
@@ -87,45 +100,37 @@
               <span class="p">},</span>
          <span class="s1">&#39;chain_ids&#39;</span><span class="p">:</span> <span class="p">{</span>
               <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;chains in PDB file, must be identical monomers if &gt; 1&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;chains in PDB file to align; all chains aligning to a &#39;</span>
+                      <span class="s1">&#39;site must share the same residue number and amino-acid &#39;</span>
+                      <span class="s1">&#39;or an error will be raised&#39;</span><span class="p">,</span>
               <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
               <span class="s1">&#39;nargs&#39;</span><span class="p">:</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span>
               <span class="p">},</span>
-         <span class="s1">&#39;alignment&#39;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s1">&#39;outprefix&#39;</span><span class="p">:</span> <span class="p">{</span>
               <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;created FASTA alignment of proteins with gaps relative &#39;</span>
-                      <span class="s1">&#39;to reference are stripped; non-stripped alignment with &#39;</span>
-                      <span class="s1">&#39;PDB protein written to file with suffix &quot;_unstripped&quot;&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;prefix for output files (can be / include directory): &#39;</span>
+                      <span class="s1">&#39;&quot;alignment.fa&quot; (alignment with gaps relative to &#39;</span>
+                      <span class="s1">&#39;reference stripped); &quot;alignment_unstripped.fa&quot; (&#39;</span>
+                      <span class="s1">&#39;non-stripped alignment with PDB chains still included);&#39;</span>
+                      <span class="s1">&#39; &quot;sites.csv&quot; (sequential sites in reference, PDB sites&#39;</span>
+                      <span class="s1">&#39;, PDB chains, wildtype in reference, wildtype in PDB, &#39;</span>
+                      <span class="s1">&#39;site entropy in bits, n effective amino acids at site, &#39;</span>
+                      <span class="s1">&#39;amino acid, frequency of amino acid)&#39;</span><span class="p">,</span>
               <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-              <span class="p">},</span>
-         <span class="s1">&#39;csv&#39;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;created CSV with sequential sites in reference, PDB &#39;</span>
-                      <span class="s1">&#39;sites, wildtype in reference, wildtype in PDB, amino &#39;</span>
-                      <span class="s1">&#39;amino acid, frequency of amino acid, site entropy in &#39;</span>
-                      <span class="s1">&#39;bits, number of effective amino acids at site&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-              <span class="p">},</span>
-         <span class="s1">&#39;chain_identity&#39;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-              <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;union&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;union&#39;</span><span class="p">,</span> <span class="s1">&#39;intersection&#39;</span><span class="p">,</span> <span class="s1">&#39;require_same&#39;</span><span class="p">],</span>
-              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;if sites differ among chains, get union, intersection, &#39;</span>
-                      <span class="s1">&#39;or raise error if not same sites&#39;</span><span class="p">,</span>
               <span class="p">},</span>
          <span class="s1">&#39;ignore_gaps&#39;</span><span class="p">:</span> <span class="p">{</span>
               <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
               <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
               <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;ignore gaps (-) when calculating frequencies, number &#39;</span>
                       <span class="s1">&#39;effective amino acids, entropy&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">_str2bool</span><span class="p">,</span>
               <span class="p">},</span>
          <span class="s1">&#39;drop_pdb&#39;</span><span class="p">:</span> <span class="p">{</span>
               <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
               <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;drop protein in `pdbfile` from `alignment` and &#39;</span>
-                      <span class="s1">&#39;`csv` stats&#39;</span><span class="p">,</span>
-              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;drop PDB protein chains from &quot;alignment.fa&quot; and &#39;</span>
+                      <span class="s1">&#39;computation of stats in &quot;sites.csv&quot; output files&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">_str2bool</span><span class="p">,</span>
               <span class="p">},</span>
          <span class="p">}</span>
 
@@ -151,9 +156,7 @@
         <span class="n">refprot_regex</span><span class="p">,</span>
         <span class="n">pdbfile</span><span class="p">,</span>
         <span class="n">chain_ids</span><span class="p">,</span>
-        <span class="n">alignment</span><span class="p">,</span>
-        <span class="n">csv</span><span class="p">,</span>
-        <span class="n">chain_identity</span><span class="o">=</span><span class="s1">&#39;union&#39;</span><span class="p">,</span>
+        <span class="n">outprefix</span><span class="p">,</span>
         <span class="n">ignore_gaps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">drop_pdb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">):</span>
@@ -169,39 +172,52 @@
 <span class="sd">    {_PARAM_DOCS}</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get output file names and make output directory if needed</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">outprefix</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">outprefix</span><span class="p">):</span>
+        <span class="n">outprefix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{outprefix}</span><span class="s2">_&quot;</span>
+    <span class="n">alignment</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{outprefix}</span><span class="s2">alignment.fa&quot;</span>
+    <span class="n">alignment_unstripped</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{outprefix}</span><span class="s2">unstripped_alignment.fa&quot;</span>
+    <span class="n">csv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{outprefix}</span><span class="s2">sites.csv&quot;</span>
+
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Running `pdb_prot_align` </span><span class="si">{pdb_prot_align.__version__}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pdbfile</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no `pdbfile` of </span><span class="si">{pdbfile}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># parse PDB sequence into dataframe mapping sequential to PDB residues</span>
+    <span class="c1"># parse PDB chains into dataframe mapping sequential to PDB residues</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsing PDB </span><span class="si">{pdbfile}</span><span class="s2"> chains {&#39; &#39;.join(chain_ids)}&quot;</span><span class="p">)</span>
-    <span class="n">pdb_df</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">pdb_seq_to_number</span><span class="p">(</span><span class="n">pdbfile</span><span class="p">,</span>
-                                                    <span class="n">chain_ids</span><span class="p">,</span>
-                                                    <span class="n">chain_identity</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed sequence of {len(pdb_df)} residues, ranging &quot;</span>
-          <span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{pdb_df[&#39;pdb_site&#39;].values[0]}</span><span class="s2"> to &quot;</span>
-          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{pdb_df[&#39;pdb_site&#39;].values[-1]}</span><span class="s2"> in PDB numbering.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># make a BioPython SeqRecord with PDB protein</span>
-    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;PDB_{os.path.splitext(os.path.basename(pdbfile))[0]}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
-                <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pdb_df</span><span class="p">[</span><span class="s1">&#39;wildtype&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">pdb_prot</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_prot</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_df</span><span class="p">)</span>
+    <span class="n">pdb_dfs</span> <span class="o">=</span> <span class="p">{}</span>   <span class="c1"># dataframe mapping sequential to PDB residue for each chain</span>
+    <span class="n">pdb_prots</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># SeqRecord for each chain</span>
+    <span class="n">pdb_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">pdbfile</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chain_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">chain_ids</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`chain_ids` not unique: </span><span class="si">{chain_ids}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">chain_id</span> <span class="ow">in</span> <span class="n">chain_ids</span><span class="p">:</span>
+        <span class="n">pdb_dfs</span><span class="p">[</span><span class="n">chain_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">pdb_seq_to_number</span><span class="p">(</span><span class="n">pdbfile</span><span class="p">,</span>
+                                                                   <span class="n">chain_id</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;PDB_</span><span class="si">{pdb_name}</span><span class="s2">_</span><span class="si">{chain_id}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                    <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pdb_dfs</span><span class="p">[</span><span class="n">chain_id</span><span class="p">][</span><span class="s1">&#39;wildtype&#39;</span><span class="p">]))</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">pdb_prots</span><span class="p">[</span><span class="n">chain_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;For chain </span><span class="si">{chain_id}</span><span class="s2">, parsed {len(pdb_dfs[chain_id])} residues&quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;, ranging from </span><span class="si">{pdb_dfs[chain_id][&#39;pdb_site&#39;].iloc[0]}</span><span class="s2"> to &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{pdb_dfs[chain_id][&#39;pdb_site&#39;].iloc[-1]}</span><span class="s2"> in PDB numbering.&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pdb_dfs</span><span class="p">[</span><span class="n">chain_id</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_prots</span><span class="p">[</span><span class="n">chain_id</span><span class="p">])</span>
+               <span class="k">for</span> <span class="n">chain_id</span> <span class="ow">in</span> <span class="n">chain_ids</span><span class="p">)</span>
 
     <span class="c1"># read in all the proteins to align</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">protsfile</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no `protsfile` file </span><span class="si">{protsfile}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">prots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">protsfile</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Read {len(prots)} sequences from </span><span class="si">{protsfile}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Read {len(prots)} sequences from </span><span class="si">{protsfile}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># ensure no proteins have same header we used for PDB</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-           <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prots</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequences in </span><span class="si">{protsfile}</span><span class="s2"> cannot have header &quot;</span>
-                         <span class="sa">f</span><span class="s2">&quot;{pdb_prot.description.strip()}&quot;</span><span class="p">)</span>
+    <span class="n">pdb_prot_headers</span> <span class="o">=</span> <span class="p">[</span><span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">pdb_prot</span>
+                        <span class="ow">in</span> <span class="n">pdb_prots</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">in</span> <span class="n">pdb_prot_headers</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prots</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequences in </span><span class="si">{protsfile}</span><span class="s2"> cannot have header in &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{pdb_prot_headers}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># get reference protein from set of proteins</span>
     <span class="n">refprot</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">prots</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">refprot_regex</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">description</span><span class="p">)]</span>
@@ -218,25 +234,24 @@
               <span class="sa">f</span><span class="s2">&quot;the following header:</span><span class="se">\n</span><span class="si">{refprot.description}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># make alignment of all proteins and the PDB sequence</span>
-    <span class="n">base</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">alignment</span><span class="p">)</span>
-    <span class="n">alignment_unstripped</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{base}</span><span class="s2">_unstripped</span><span class="si">{ext}</span><span class="s2">&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using `mafft` to align sequences to </span><span class="si">{alignment_unstripped}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">aln</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">align_prots_mafft</span><span class="p">(</span><span class="n">prots</span> <span class="o">+</span> <span class="p">[</span><span class="n">pdb_prot</span><span class="p">])</span>
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">aln</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">align_prots_mafft</span><span class="p">(</span><span class="n">prots</span> <span class="o">+</span>
+                                                 <span class="nb">list</span><span class="p">(</span><span class="n">pdb_prots</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_prots</span><span class="p">)</span>
     <span class="n">Bio</span><span class="o">.</span><span class="n">AlignIO</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">aln</span><span class="p">,</span> <span class="n">alignment_unstripped</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
 
     <span class="c1"># get mapping of reference protein and PDB sequential sites</span>
     <span class="n">ref_pdb_site_map</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">aligned_site_map</span><span class="p">(</span>
                             <span class="n">aln</span><span class="p">,</span>
-                            <span class="p">[</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">],</span>
+                            <span class="p">[</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="o">*</span><span class="n">pdb_prot_headers</span><span class="p">]</span>
                             <span class="p">)</span>
     <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_pdb_site_map</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">description</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
-               <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pdb_prot</span><span class="p">,</span> <span class="n">refprot</span><span class="p">])</span>
+               <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">refprot</span><span class="p">,</span> <span class="o">*</span><span class="n">pdb_prots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
 
-    <span class="c1"># remove PDB sequence?</span>
+    <span class="c1"># remove PDB sequences?</span>
     <span class="k">if</span> <span class="n">drop_pdb</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropping PDB sequence </span><span class="si">{pdb_prot.description}</span><span class="s2"> from alignment&quot;</span><span class="p">)</span>
-        <span class="n">aln</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">description</span> <span class="o">!=</span> <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dropping PDB chains from alignment&#39;</span><span class="p">)</span>
+        <span class="n">aln</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">description</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pdb_prot_headers</span><span class="p">]</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span>
 
     <span class="c1"># strip gaps relative to reference sequence</span>
@@ -248,54 +263,99 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alignment</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{head}</span><span class="se">\n</span><span class="si">{s}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">))</span>
 
-    <span class="c1"># Create data frame that will become `csv` output.</span>
-    <span class="c1"># First get site numbers and wildtype.</span>
+    <span class="c1"># map (pdb_chain, isite) to pdb_site or pdb_wildtype</span>
+    <span class="n">to_pdb</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">valstr</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">]:</span>
+        <span class="n">to_pdb</span><span class="p">[</span><span class="n">valstr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{(</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">):</span> <span class="s1">&#39;NaN&#39;</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">chain_id</span><span class="p">,</span> <span class="n">pdb_df</span> <span class="ow">in</span> <span class="n">pdb_dfs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">isite</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">(</span><span class="n">pdb_df</span>
+                               <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;wildtype&#39;</span><span class="p">:</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">})</span>
+                               <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
+                               <span class="p">[</span><span class="n">valstr</span><span class="p">]</span>
+                               <span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                               <span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                               <span class="p">):</span>
+                <span class="n">to_pdb</span><span class="p">[</span><span class="n">valstr</span><span class="p">][</span><span class="n">chain_id</span><span class="p">,</span> <span class="n">isite</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="c1"># now create data frame with PDB sites / wildtypes</span>
     <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">ref_pdb_site_map</span>
-        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;isite&#39;</span><span class="p">,</span>
-                         <span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">:</span> <span class="s1">&#39;pdb_isite&#39;</span><span class="p">})</span>
-        <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">pdb_site</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">]</span>
-                                    <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pdb_df</span>
-                                         <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
-                                         <span class="p">[</span><span class="s1">&#39;pdb_site&#39;</span><span class="p">]</span>
-                                         <span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
-                                         <span class="n">na_action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-                                    <span class="p">),</span>
-                <span class="n">wildtype</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">]</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">old</span><span class="p">:</span> <span class="n">new</span> <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span>
+                         <span class="p">[(</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s1">&#39;isite&#39;</span><span class="p">),</span>
+                          <span class="o">*</span><span class="p">[(</span><span class="n">pdb_prot</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">pdb_prot</span>
+                            <span class="ow">in</span> <span class="n">pdb_prots</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+                          <span class="p">]</span>
+                         <span class="p">}</span>
+                <span class="p">)</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">wildtype</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">]</span>
                                     <span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">wt</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">wt</span> <span class="ow">in</span>
                                           <span class="nb">enumerate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">refprot</span><span class="o">.</span><span class="n">seq</span><span class="p">))},</span>
                                          <span class="n">na_action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-                                    <span class="p">),</span>
-                <span class="n">pdb_wildtype</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">]</span>
-                                        <span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pdb_df</span>
-                                             <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
-                                             <span class="p">[</span><span class="s1">&#39;wildtype&#39;</span><span class="p">]</span>
-                                             <span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
-                                             <span class="n">na_action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-                                        <span class="p">),</span>
+                                    <span class="p">)</span>
                 <span class="p">)</span>
-        <span class="p">[[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">]]</span>
+        <span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">],</span>
+              <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;pdb_chain&#39;</span><span class="p">,</span>
+              <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">,</span>
+              <span class="p">)</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">pdb_chain</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_chain&#39;</span><span class="p">]</span>  <span class="c1"># chain NaN if site is NaN</span>
+                                     <span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">]),</span> <span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+                                     <span class="p">),</span>
+                <span class="n">pdb_isite</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;pdb_isite&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+            <span class="n">pdb_site</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">to_pdb</span><span class="p">[</span><span class="s1">&#39;pdb_site&#39;</span><span class="p">]</span>
+                                                  <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">pdb_chain</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">pdb_isite</span><span class="p">]</span>
+                                                  <span class="p">),</span>
+                                       <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">pdb_wildtype</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">to_pdb</span><span class="p">[</span><span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">]</span>
+                                                      <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">pdb_chain</span><span class="p">,</span>
+                                                       <span class="n">r</span><span class="o">.</span><span class="n">pdb_isite</span><span class="p">]</span>
+                                                      <span class="p">),</span>
+                                           <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nchains</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;isite&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pdb_chain</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;(pdb_chain != &quot;NaN&quot;) or (nchains == 1)&#39;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s1">&#39;NaN&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)})</span>
+        <span class="p">[[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_chain&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">]]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># check that each site aligns to unique PDB wildtype</span>
+    <span class="n">nonunique_isites</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span>
+        <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pdb_chain&#39;</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;isite&#39;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;n &gt; 1&#39;</span><span class="p">)</span>
+        <span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">]</span>
+        <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">nonunique_isites</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Sites map to non-unique PDB site / wildtype:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                         <span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;isite in @nonunique_isites&#39;</span><span class="p">)</span>
+                             <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_chain&#39;</span><span class="p">])))</span>
+
+    <span class="c1"># add amino-acid frequencies and entropies / n_effective</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span>
         <span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">alignment_to_count_df</span><span class="p">(</span>
                                             <span class="n">alignment</span><span class="p">,</span>
                                             <span class="n">ignore_gaps</span><span class="o">=</span><span class="n">ignore_gaps</span><span class="p">,</span>
-                                            <span class="n">as_freqs</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                                            <span class="n">as_freqs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                            <span class="n">add_entropy_neff</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
                <span class="n">on</span><span class="o">=</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span>
-               <span class="n">validate</span><span class="o">=</span><span class="s1">&#39;one_to_one&#39;</span><span class="p">,</span>
+               <span class="n">validate</span><span class="o">=</span><span class="s1">&#39;many_to_one&#39;</span><span class="p">,</span>
                <span class="p">)</span>
-        <span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">])</span>
-        <span class="o">.</span><span class="n">assign</span><span class="p">(</span>
-            <span class="n">entropy</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="o">-</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span>
-                                                  <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
-                                      <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">n_effective</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;entropy&#39;</span><span class="p">])</span>
-            <span class="p">)</span>
-        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-        <span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">,</span>
-                       <span class="s1">&#39;entropy&#39;</span><span class="p">,</span> <span class="s1">&#39;n_effective&#39;</span><span class="p">],</span>
+        <span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_chain&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">,</span> <span class="s1">&#39;entropy&#39;</span><span class="p">,</span> <span class="s1">&#39;n_effective&#39;</span><span class="p">],</span>
               <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;amino_acid&#39;</span><span class="p">,</span>
               <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span>
               <span class="p">)</span>
-        <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;amino_acid&#39;</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_chain&#39;</span><span class="p">,</span> <span class="s1">&#39;amino_acid&#39;</span><span class="p">])</span>
         <span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing CSV with detailed information to </span><span class="si">{csv}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -311,6 +371,8 @@
         <span class="n">param_type</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;{{{&#39;, &#39;.join(param_d[&#39;choices&#39;])}}}&quot;</span>
     <span class="k">elif</span> <span class="s1">&#39;nargs&#39;</span> <span class="ow">in</span> <span class="n">param_d</span> <span class="ow">and</span> <span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;nargs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
         <span class="n">param_type</span> <span class="o">=</span> <span class="s1">&#39;list&#39;</span>
+    <span class="k">elif</span> <span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">_str2bool</span><span class="p">:</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="s1">&#39;bool&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="n">param_help</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">param_d</span><span class="p">[</span><span class="s1">&#39;help&#39;</span><span class="p">],</span> <span class="mi">70</span><span class="p">)),</span>
@@ -419,7 +481,7 @@
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

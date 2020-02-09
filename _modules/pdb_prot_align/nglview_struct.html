@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pdb_prot_align.nglview_struct &#8212; pdb_prot_align 0.2.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pdb_prot_align.nglview_struct</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">===============</span>
+<span class="sd">nglview_struct</span>
+<span class="sd">===============</span>
+
+<span class="sd">Utilities for `nglview &lt;https://github.com/arose/nglview&gt;`_ structures.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">import</span> <span class="nn">IPython.display</span>
+
+<span class="kn">import</span> <span class="nn">nglview</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">pdb_prot_align.colorschemes</span>
+
+
+<div class="viewcode-block" id="colorscheme_by_site"><a class="viewcode-back" href="../../pdb_prot_align.nglview_struct.html#pdb_prot_align.nglview_struct.colorscheme_by_site">[docs]</a><span class="k">def</span> <span class="nf">colorscheme_by_site</span><span class="p">(</span><span class="n">colorscheme_name</span><span class="p">,</span>
+                        <span class="n">sites_df</span><span class="p">,</span>
+                        <span class="n">color_by</span><span class="p">,</span>
+                        <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add a color scheme to the color registry.</span>
+
+<span class="sd">    The scheme can then be added to a `ngview.widget.NGLWidget` as described</span>
+<span class="sd">    `here &lt;https://github.com/dwhswenson/contact_map/pull/62&gt;`_. For instance::</span>
+
+<span class="sd">        view.add_cartoon(color=colorscheme_name)</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    colorscheme_name : str</span>
+<span class="sd">        Name of the color scheme.</span>
+<span class="sd">    sites_df : pandas.DataFrame or str</span>
+<span class="sd">        Information on how to color sites. Can either be data frame or name</span>
+<span class="sd">        of CSV file with data frame. Must have columns named &#39;pdb_chain&#39;</span>
+<span class="sd">        and &#39;pdb_site&#39; as well as the column specified by `color_by`.</span>
+<span class="sd">    color_by : str or 2-tuple</span>
+<span class="sd">        How to color the sites. Can either specify as a str the name of</span>
+<span class="sd">        a column in `sites_df` that has the name of a color for each site,</span>
+<span class="sd">        or can be the 2-tuple `(val_col, color_map)`. In this case,</span>
+<span class="sd">        `val_col` is name of column with numerical values, and `color_map`</span>
+<span class="sd">        is a :class:`pdb_prot_align.colorschemes.ValueToColorMap` that maps</span>
+<span class="sd">        the numbers in this column to colors. If colors are specified as</span>
+<span class="sd">        str and are hex, then they need to be like this &#39;#25828e&#39;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">site_col</span> <span class="o">=</span> <span class="s1">&#39;pdb_site&#39;</span>
+    <span class="n">chain_col</span> <span class="o">=</span> <span class="s1">&#39;pdb_chain&#39;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sites_df</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">sites_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">sites_df</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sites_df</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`sites_df` must be data frame or name of CSV file&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_by</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">color_col</span> <span class="o">=</span> <span class="n">color_by</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">color_by</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_by</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span>
+          <span class="nb">isinstance</span><span class="p">(</span><span class="n">color_by</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                     <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">colorschemes</span><span class="o">.</span><span class="n">ValueToColorMap</span><span class="p">)):</span>
+        <span class="n">val_col</span> <span class="o">=</span> <span class="n">color_by</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">val_col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sites_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`sites_df` lacks column </span><span class="si">{val_col}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">color_map</span> <span class="o">=</span> <span class="n">color_by</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">color_col</span> <span class="o">=</span> <span class="s1">&#39;color&#39;</span>
+        <span class="k">if</span> <span class="n">color_col</span> <span class="ow">in</span> <span class="n">sites_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`sites_df` can not have column </span><span class="si">{color_col}</span><span class="s2"> &quot;</span>
+                             <span class="s1">&#39;if `color_by` is a 2-tuple&#39;</span><span class="p">)</span>
+        <span class="n">sites_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">sites_df</span>
+                    <span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+                        <span class="n">color</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">val_col</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">color_map</span><span class="o">.</span><span class="n">val_to_color</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">site_col</span><span class="p">,</span> <span class="n">chain_col</span><span class="p">,</span> <span class="n">color_col</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sites_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`sites_df` lacks column </span><span class="si">{col}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Drop duplicate and NaN rows, which could be case if data frame</span>
+    <span class="c1"># is tidy and has amino acid identity, and ensure site is integer.</span>
+    <span class="n">sites_df</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">sites_df</span>
+        <span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+        <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">site_col</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">site_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)})</span>
+        <span class="p">)</span>
+    <span class="c1"># make sure just one color per site / chain</span>
+    <span class="n">dups</span> <span class="o">=</span> <span class="p">(</span><span class="n">sites_df</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">chain_col</span><span class="p">,</span> <span class="n">site_col</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">NamedAgg</span><span class="p">(</span><span class="n">color_col</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">))</span>
+            <span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;nrows &gt; 1&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+            <span class="p">[[</span><span class="n">chain_col</span><span class="p">,</span> <span class="n">site_col</span><span class="p">]]</span>
+            <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dups</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;non-unique colors for some sites:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dups</span><span class="p">))</span>
+
+    <span class="c1"># Do the coloring; details on selection schemes:</span>
+    <span class="c1"># https://github.com/arose/ngl/blob/master/doc/usage/selection-language.md</span>
+    <span class="n">colorscheme</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">sites_df</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+        <span class="n">chain</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tup</span><span class="p">,</span> <span class="n">chain_col</span><span class="p">)</span>
+        <span class="n">resi</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tup</span><span class="p">,</span> <span class="n">site_col</span><span class="p">)</span>
+        <span class="n">sel_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;:</span><span class="si">{chain}</span><span class="s2"> and </span><span class="si">{resi}</span><span class="s2">&quot;</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tup</span><span class="p">,</span> <span class="n">color_col</span><span class="p">)</span>
+        <span class="n">colorscheme</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">color</span><span class="p">,</span> <span class="n">sel_str</span><span class="p">])</span>
+
+    <span class="n">nglview</span><span class="o">.</span><span class="n">color</span><span class="o">.</span><span class="n">ColormakerRegistry</span><span class="o">.</span><span class="n">add_scheme</span><span class="p">(</span><span class="n">colorscheme_name</span><span class="p">,</span> <span class="n">colorscheme</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="render_html"><a class="viewcode-back" href="../../pdb_prot_align.nglview_struct.html#pdb_prot_align.nglview_struct.render_html">[docs]</a><span class="k">def</span> <span class="nf">render_html</span><span class="p">(</span><span class="n">view</span><span class="p">,</span>
+                <span class="o">*</span><span class="p">,</span>
+                <span class="n">html_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Render widget to HTML display.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    view : ngview.widget.NGLWidget</span>
+<span class="sd">        The structure widget to render.</span>
+<span class="sd">    html_file : None or str</span>
+<span class="sd">        If you want to also save to permanent HTML file, provide name here.</span>
+<span class="sd">    orientation : list</span>
+<span class="sd">        Set to this camera orientation (list of 16 numbers), fixing this bug:</span>
+<span class="sd">        https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933</span>
+<span class="sd">        You can get the desired orientation by manually manipulating the widget</span>
+<span class="sd">        in a Jupyter notebook and then calling `view._get_orientation`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    IPython.display.DisplayHandle</span>
+<span class="sd">        A handle that displays the HTML structure in a Jupyter notebook.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w+&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.html&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">nglview</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">html_text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">orientation</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">orientation</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;`orientation` must be list of 16 numbers&#39;</span><span class="p">)</span>
+        <span class="n">html_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&quot;_camera_orientation&quot;:\s+\[[^\]]*\]&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;&quot;_camera_orientation&quot;: [&#39;</span> <span class="o">+</span>
+                           <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">orientation</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span><span class="p">,</span>
+                           <span class="n">html_text</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">html_file</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">html_file</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;.html&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`html_file` needs extension .html: </span><span class="si">{html_file}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">html_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_html</span><span class="p">:</span>
+            <span class="n">f_html</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html_text</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">html_text</span><span class="p">))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

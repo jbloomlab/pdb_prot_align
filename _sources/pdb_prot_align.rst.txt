@@ -11,5 +11,8 @@ Submodules
 
 .. toctree::
 
+   pdb_prot_align.colorschemes
    pdb_prot_align.main
+   pdb_prot_align.nglview_struct
+   pdb_prot_align.pymol_struct
    pdb_prot_align.utils

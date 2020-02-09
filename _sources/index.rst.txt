@@ -10,7 +10,7 @@ The goal of ``pdb_prot_align`` is to simplify reconciliation of this numbering.
 You may want to simply run ``pdb_prot_align`` via its :ref:`cli`.
 However, if you prefer to work within Python you can use the :mod:`pdb_prot_align` package, including the top-level :func:`pdb_prot_align.main.run` that mimics the :ref:`cli`.
 
-See below for more information and examples:
+As described in the :ref:`examples`, there are also utilities to make it easy to visualize the results in the context of the protein structures using `pymol <https://pymol.org/>`_ or `nglview <https://github.com/arose/nglview>`_.
 
 Contents
 ----------
