@@ -23,6 +23,8 @@ import Bio.SeqUtils
 
 import natsort
 
+import numpy
+
 import pandas as pd
 
 
@@ -30,6 +32,7 @@ def alignment_to_count_df(fasta_alignment,
                           *,
                           ignore_gaps=False,
                           as_freqs=False,
+                          add_entropy_neff=False,
                           ):
     """Convert FASTA alignment to counts data frame.
 
@@ -41,6 +44,9 @@ def alignment_to_count_df(fasta_alignment,
         Ignore gap characters ('-') in counts.
     as_freqs : bool
         Return frequencies rather than counts.
+    add_entropy_neff : bool
+        Add columns with site entropy (bits) and number effective amino acids.
+        Requires `as_freqs` to be `True`.
 
     Returns
     -------
@@ -69,6 +75,12 @@ def alignment_to_count_df(fasta_alignment,
     ...     freqs_nogaps = alignment_to_count_df(f.name,
     ...                                          ignore_gaps=True,
     ...                                          as_freqs=True)
+    ...     freqs_with_ent = alignment_to_count_df(f.name,
+    ...                                            ignore_gaps=True,
+    ...                                            as_freqs=True,
+    ...                                            add_entropy_neff=True,
+    ...                                            )
+
     >>> counts
        isite  -  A  C  G  I  K  L  M  N  S
     0      1  1  0  0  3  0  0  0  0  0  0
@@ -88,14 +100,26 @@ def alignment_to_count_df(fasta_alignment,
     5      6  0  0  0  0  0  0  0  0  1
     6      7  0  0  0  1  0  3  0  0  0
     >>> freqs_nogaps.round(2)
-       isite    A     C     G     I     K     L     M     N     S
-    0      1  0.0  0.00  0.75  0.00  0.00  0.00  0.00  0.00  0.00
-    1      2  0.0  0.00  0.00  0.00  0.75  0.00  0.00  0.00  0.00
-    2      3  0.0  0.00  0.00  0.00  0.00  0.00  0.00  0.25  0.00
-    3      4  1.0  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
-    4      5  0.0  0.75  0.00  0.00  0.00  0.00  0.25  0.00  0.00
-    5      6  0.0  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.25
-    6      7  0.0  0.00  0.00  0.25  0.00  0.75  0.00  0.00  0.00
+       isite    A     C    G     I    K     L     M    N    S
+    0      1  0.0  0.00  1.0  0.00  0.0  0.00  0.00  0.0  0.0
+    1      2  0.0  0.00  0.0  0.00  1.0  0.00  0.00  0.0  0.0
+    2      3  0.0  0.00  0.0  0.00  0.0  0.00  0.00  1.0  0.0
+    3      4  1.0  0.00  0.0  0.00  0.0  0.00  0.00  0.0  0.0
+    4      5  0.0  0.75  0.0  0.00  0.0  0.00  0.25  0.0  0.0
+    5      6  0.0  0.00  0.0  0.00  0.0  0.00  0.00  0.0  1.0
+    6      7  0.0  0.00  0.0  0.25  0.0  0.75  0.00  0.0  0.0
+    >>> (freqs_with_ent.drop(columns=['entropy', 'n_effective']) ==
+    ...  freqs_nogaps).all(None)
+    True
+    >>> freqs_with_ent[['entropy', 'n_effective']].round(3)
+       entropy  n_effective
+    0    0.000        1.000
+    1    0.000        1.000
+    2    0.000        1.000
+    3    0.000        1.000
+    4    0.811        1.755
+    5    0.000        1.000
+    6    0.811        1.755
 
     """
     seqs = [str(s.seq) for s in Bio.AlignIO.read(fasta_alignment, 'fasta')]
@@ -113,8 +137,9 @@ def alignment_to_count_df(fasta_alignment,
           .astype(int)
           .assign(isite=lambda x: x.index + 1)
           )
-    cols = ['isite'] + [char for char in df.columns[: -1]
-                        if char != '-' or not ignore_gaps]
+    char_cols = [char for char in df.columns[: -1]
+                 if char != '-' or not ignore_gaps]
+    df = df[['isite'] + char_cols]
 
     if as_freqs:
         df = (df
@@ -123,8 +148,30 @@ def alignment_to_count_df(fasta_alignment,
                    axis=0)
               .reset_index()
               )
+        if not numpy.allclose(1, df[char_cols].sum(axis=1)):
+            raise RuntimeError('rows do not sum to 1:\n' +
+                               str(df[char_cols].sum(axis=1)))
 
-    return df[cols]
+    if add_entropy_neff:
+        if not as_freqs:
+            raise ValueError('cannot set `add_entropy_neff` without `as_freq`')
+        df = df.assign(
+                entropy=lambda x: (x[char_cols]
+                                   .apply(lambda r: -(r[r > 0] *
+                                                      numpy.log(r[r > 0]) /
+                                                      numpy.log(2)
+                                                      ).sum(),
+                                          axis=1)
+                                   ),
+                n_effective=lambda x: 2**x['entropy']
+                )
+        if df['entropy'].any() < 0:
+            raise RuntimeError('negative entropy')
+        else:
+            # get rid of annoying -0 by changing to 0
+            df['entropy'] = numpy.abs(df['entropy'])
+
+    return df
 
 
 def align_prots_mafft(prots, *, mafft='mafft'):
@@ -201,6 +248,8 @@ def aligned_site_map(aln, heads):
 
     Example
     -------
+    Create and parse an alignment:
+
     >>> with tempfile.TemporaryFile('w+') as f:
     ...     _ = f.write(textwrap.dedent(
     ...             '''
@@ -217,11 +266,17 @@ def aligned_site_map(aln, heads):
     ...     f.flush()
     ...     _ = f.seek(0)
     ...     aln = Bio.AlignIO.read(f, 'fasta')
-    >>> aligned_site_map(aln, ['seq1', 'seq2', 'seq3'])
+
+    Show the alignment site map. The gymnastics with converting to str and
+    replacing 'nan' are to make output format the same in both `pandas`
+    >= and < 1.0 and earlier versions so doctest passes in both:
+
+    >>> (aligned_site_map(aln, ['seq1', 'seq2', 'seq3'])
+    ...  .astype(str).replace('nan', '<NA>'))
        seq1  seq2  seq3
-    0     1   NaN     1
-    1     2     1   NaN
-    2   NaN   NaN     2
+    0     1  <NA>     1
+    1     2     1  <NA>
+    2  <NA>  <NA>     2
     3     3     2     3
     4     4     3     4
     5     5     4     5
@@ -271,7 +326,7 @@ def aligned_site_map(aln, heads):
     return df
 
 
-def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='union'):
+def pdb_seq_to_number(pdbfile, chain_ids, chain_identity='require_same'):
     """Get sequence and number of chain(s) for some protein in PDB file.
 
     Parameters

@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# run this command to install `nglview` after building environment; see here:
+# https://github.com/arose/nglview#installation
+jupyter-nbextension enable nglview --py --sys-prefix

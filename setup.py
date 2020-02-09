@@ -52,8 +52,9 @@ setup(
     license='GPLv3',
     install_requires=[
             'biopython>=1.74',
+            'matplotlib>=3.1',
             'natsort>=6.0.0',
-            'pandas>=0.25.3,<1.0',
+            'pandas>=0.25.3',
             ],
     platforms='Linux and Mac OS X.',
     packages=['pdb_prot_align'],
