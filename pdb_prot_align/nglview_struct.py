@@ -3,11 +3,16 @@
 nglview_struct
 ===============
 
-Utilities for `nglview <http://nglviewer.org/nglview/latest/index.html>`_
-structures.
+Utilities for `nglview <https://github.com/arose/nglview>`_ structures.
 
 """
 
+
+import os
+import re
+import tempfile
+
+import IPython.display
 
 import nglview
 
@@ -109,6 +114,54 @@ def colorscheme_by_site(colorscheme_name,
         colorscheme.append([color, sel_str])
 
     nglview.color.ColormakerRegistry.add_scheme(colorscheme_name, colorscheme)
+
+
+def render_html(view,
+                *,
+                html_file=None,
+                orientation=None,
+                ):
+    """Render widget to HTML display.
+
+    Parameters
+    ----------
+    view : ngview.widget.NGLWidget
+        The structure widget to render.
+    html_file : None or str
+        If you want to also save to permanent HTML file, provide name here.
+    orientation : list
+        Set to this camera orientation (list of 16 numbers), fixing this bug:
+        https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933
+        You can get the desired orientation by manually manipulating the widget
+        in a Jupyter notebook and then calling `view._get_orientation`.
+
+    Returns
+    -------
+    IPython.display.DisplayHandle
+        A handle that displays the HTML structure in a Jupyter notebook.
+
+    """
+    with tempfile.TemporaryFile(mode='w+', suffix='.html') as f:
+        nglview.write_html(f, view)
+        f.flush()
+        f.seek(0)
+        html_text = f.read()
+
+    if orientation:
+        if len(orientation) != 16:
+            raise ValueError('`orientation` must be list of 16 numbers')
+        html_text = re.sub(r'"_camera_orientation":\s+\[[^\]]*\]',
+                           '"_camera_orientation": [' +
+                           ', '.join(map(str, orientation)) + ']',
+                           html_text)
+
+    if html_file:
+        if os.path.splitext(html_file)[1] != '.html':
+            raise ValueError(f"`html_file` needs extension .html: {html_file}")
+        with open(html_file, 'w') as f_html:
+            f_html.write(html_text)
+
+    return IPython.display.display(IPython.display.HTML(data=html_text))
 
 
 if __name__ == '__main__':

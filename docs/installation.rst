@@ -17,8 +17,8 @@ The source code for ``pdb_prot_align`` is available on GitHub at https://github.
 Installing PyMol and nglview
 ++++++++++++++++++++++++++++++
 In some cases, you may want to visualize the results on protein structures using pymol_ or nglview_.
-This can be done as described in the :doc:`pymol_example` and the :doc:`nglview_example` examples.
-In order to make these visualizations, you must of course install pymol_ or nglview_, which is substantially more complex than the simple instructions above to install ``pdb_prot_align``.
+This can be done as described in the :doc:`pymol_example` and the :doc:`nglview_example` examples by taking advantage of the :mod:`pdb_prot_align.pymol_struct` and :mod:`pdb_prot_align.nglview_struct` modules.
+In order to uses these, you must install pymol_ or nglview_, which is substantially more complex than the simple instructions above to install ``pdb_prot_align``.
 
 pymol_ can be installed a number of ways, as can nglview_.
 We suggest doing it via conda_.
