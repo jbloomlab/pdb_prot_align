@@ -4,15 +4,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>nglview_struct &#8212; pdb_prot_align 0.2.0 documentation</title>
+    <title>nglview_struct &#8212; pdb_prot_align 0.2.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pymol_struct" href="pdb_prot_align.pymol_struct.html" />
@@ -66,7 +66,7 @@ str and are hex, then they need to be like this ‘#25828e’.</p></li>
 
 <dl class="function">
 <dt id="pdb_prot_align.nglview_struct.render_html">
-<code class="sig-prename descclassname">pdb_prot_align.nglview_struct.</code><code class="sig-name descname">render_html</code><span class="sig-paren">(</span><em class="sig-param">view</em>, <em class="sig-param">*</em>, <em class="sig-param">html_file=None</em>, <em class="sig-param">orientation=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/nglview_struct.html#render_html"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.nglview_struct.render_html" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pdb_prot_align.nglview_struct.</code><code class="sig-name descname">render_html</code><span class="sig-paren">(</span><em class="sig-param">view</em>, <em class="sig-param">*</em>, <em class="sig-param">html_file=None</em>, <em class="sig-param">orientation=None</em>, <em class="sig-param">remove_widget_view=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/nglview_struct.html#render_html"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.nglview_struct.render_html" title="Permalink to this definition">¶</a></dt>
 <dd><p>Render widget to HTML display.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -77,6 +77,9 @@ str and are hex, then they need to be like this ‘#25828e’.</p></li>
 <a class="reference external" href="https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933">https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933</a>
 You can get the desired orientation by manually manipulating the widget
 in a Jupyter notebook and then calling <cite>view._get_orientation</cite>.</p></li>
+<li><p><strong>remove_widget_view</strong> (<em>bool</em>) – Remove the widget view lines, so the HTML just gives the widget state.
+Helpful if you want to embed widgets in HTML rendering without showing
+another time.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -167,7 +170,7 @@ in a Jupyter notebook and then calling <cite>view._get_orientation</cite>.</p></
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -184,7 +187,7 @@ in a Jupyter notebook and then calling <cite>view._get_orientation</cite>.</p></
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -4,15 +4,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pdb_prot_align.nglview_struct &#8212; pdb_prot_align 0.2.0 documentation</title>
+    <title>pdb_prot_align.nglview_struct &#8212; pdb_prot_align 0.2.1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="../../_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -154,6 +154,7 @@
                 <span class="o">*</span><span class="p">,</span>
                 <span class="n">html_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">remove_widget_view</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Render widget to HTML display.</span>
 
@@ -168,6 +169,10 @@
 <span class="sd">        https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933</span>
 <span class="sd">        You can get the desired orientation by manually manipulating the widget</span>
 <span class="sd">        in a Jupyter notebook and then calling `view._get_orientation`.</span>
+<span class="sd">    remove_widget_view : bool</span>
+<span class="sd">        Remove the widget view lines, so the HTML just gives the widget state.</span>
+<span class="sd">        Helpful if you want to embed widgets in HTML rendering without showing</span>
+<span class="sd">        another time.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -188,6 +193,14 @@
                            <span class="s1">&#39;&quot;_camera_orientation&quot;: [&#39;</span> <span class="o">+</span>
                            <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">orientation</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span><span class="p">,</span>
                            <span class="n">html_text</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">remove_widget_view</span><span class="p">:</span>
+        <span class="n">widget_view_regex</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">r</span><span class="s1">&#39;&lt;script type=&quot;application/vnd\.jupyter\.widget\-view\+json&quot;&gt;&#39;</span>
+                <span class="sa">r</span><span class="s1">&#39;\n.*?\n&#39;</span>
+                <span class="s1">&#39;&lt;/script&gt;&#39;</span>
+                <span class="p">)</span>
+        <span class="n">html_text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">widget_view_regex</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">html_text</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">html_file</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">html_file</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;.html&#39;</span><span class="p">:</span>
@@ -277,7 +290,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -294,7 +307,7 @@
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
