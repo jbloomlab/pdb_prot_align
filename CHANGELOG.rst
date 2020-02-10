@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com>`_.
 
+0.2.1
+------
+
+Added
++++++
+* ``remove_widget_view`` option to ``nglview_struct.render_html`` to enable embedding of structure widgets in HTML without showing them twice.
+
 0.2.0
 ------
 
