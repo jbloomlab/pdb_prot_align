@@ -120,6 +120,7 @@ def render_html(view,
                 *,
                 html_file=None,
                 orientation=None,
+                remove_widget_view=False,
                 ):
     """Render widget to HTML display.
 
@@ -134,6 +135,10 @@ def render_html(view,
         https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933
         You can get the desired orientation by manually manipulating the widget
         in a Jupyter notebook and then calling `view._get_orientation`.
+    remove_widget_view : bool
+        Remove the widget view lines, so the HTML just gives the widget state.
+        Helpful if you want to embed widgets in HTML rendering without showing
+        another time.
 
     Returns
     -------
@@ -154,6 +159,14 @@ def render_html(view,
                            '"_camera_orientation": [' +
                            ', '.join(map(str, orientation)) + ']',
                            html_text)
+
+    if remove_widget_view:
+        widget_view_regex = (
+                r'<script type="application/vnd\.jupyter\.widget\-view\+json">'
+                r'\n.*?\n'
+                '</script>'
+                )
+        html_text = re.sub(widget_view_regex, '', html_text)
 
     if html_file:
         if os.path.splitext(html_file)[1] != '.html':
