@@ -134,7 +134,7 @@ def render_html(view,
         Set to this camera orientation (list of 16 numbers), fixing this bug:
         https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933
         You can get the desired orientation by manually manipulating the widget
-        in a Jupyter notebook and then calling `view._get_orientation`.
+        in a Jupyter notebook and then calling `view._camera_orientation`.
     remove_widget_view : bool
         Remove the widget view lines, so the HTML just gives the widget state.
         Helpful if you want to embed widgets in HTML rendering without showing
