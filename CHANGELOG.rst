@@ -13,6 +13,10 @@ Added
 ++++++
 * ``genbank`` module.
 
+Fixed
++++++
+* Fixed bug when PDB has insertions relative to reference sequence.
+
 0.2.1
 ------
 
