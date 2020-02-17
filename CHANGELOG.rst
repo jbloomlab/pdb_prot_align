@@ -17,6 +17,8 @@ Fixed
 +++++
 * Fixed bug when PDB has insertions relative to reference sequence.
 
+* Fixed bug if floats in residue number column for coloring structures.
+
 0.2.1
 ------
 

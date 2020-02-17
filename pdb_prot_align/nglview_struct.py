@@ -109,6 +109,10 @@ def colorscheme_by_site(colorscheme_name,
     for tup in sites_df.itertuples():
         chain = getattr(tup, chain_col)
         resi = getattr(tup, site_col)
+        if isinstance(resi, float):
+            if resi != int(resi):
+                raise ValueError(f"non-integer residue {resi}")
+            resi = int(resi)
         sel_str = f":{chain} and {resi}"
         color = getattr(tup, color_col)
         colorscheme.append([color, sel_str])

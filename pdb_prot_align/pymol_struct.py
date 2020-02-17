@@ -104,6 +104,10 @@ def color_by_site(cmd,
     for tup in sites_df.itertuples():
         chain = getattr(tup, chain_col)
         resi = getattr(tup, site_col)
+        if isinstance(resi, float):
+            if int(resi) != resi:
+                raise ValueError(f"non-integer residue {resi}")
+            resi = int(resi)
         sel_str = f"{object_sel}chain {chain} and resi {resi}"
         color = getattr(tup, color_col).replace('#', '0x')
         cmd.color(color, sel_str)
