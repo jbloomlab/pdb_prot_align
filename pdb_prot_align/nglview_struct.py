@@ -109,6 +109,10 @@ def colorscheme_by_site(colorscheme_name,
     for tup in sites_df.itertuples():
         chain = getattr(tup, chain_col)
         resi = getattr(tup, site_col)
+        if isinstance(resi, float):
+            if resi != int(resi):
+                raise ValueError(f"non-integer residue {resi}")
+            resi = int(resi)
         sel_str = f":{chain} and {resi}"
         color = getattr(tup, color_col)
         colorscheme.append([color, sel_str])
@@ -121,8 +125,9 @@ def render_html(view,
                 html_file=None,
                 orientation=None,
                 remove_widget_view=False,
+                returnval='display',
                 ):
-    """Render widget to HTML display.
+    """Render widget to HTML.
 
     Parameters
     ----------
@@ -134,16 +139,19 @@ def render_html(view,
         Set to this camera orientation (list of 16 numbers), fixing this bug:
         https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933
         You can get the desired orientation by manually manipulating the widget
-        in a Jupyter notebook and then calling `view._get_orientation`.
+        in a Jupyter notebook and then calling `view._camera_orientation`.
     remove_widget_view : bool
         Remove the widget view lines, so the HTML just gives the widget state.
         Helpful if you want to embed widgets in HTML rendering without showing
         another time.
+    returnval : {'display', 'HTML', 'none'}
+        Return value (see Returns_).
 
     Returns
     -------
-    IPython.display.DisplayHandle
-        A handle that displays the HTML structure in a Jupyter notebook.
+    IPython.display.DisplayHandle or IPython.display.HTML or None.
+        A handle for a Jupyter notebook, or `None` depending on value
+        of `returnval`.
 
     """
     with tempfile.TemporaryFile(mode='w+', suffix='.html') as f:
@@ -174,7 +182,14 @@ def render_html(view,
         with open(html_file, 'w') as f_html:
             f_html.write(html_text)
 
-    return IPython.display.display(IPython.display.HTML(data=html_text))
+    if returnval == 'display':
+        return IPython.display.display(IPython.display.HTML(data=html_text))
+    elif returnval == 'HTML':
+        return IPython.display.HTML(data=html_text)
+    elif returnval == 'none':
+        return None
+    else:
+        raise ValueError(f"invalid `returnval` {returnval}")
 
 
 if __name__ == '__main__':

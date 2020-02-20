@@ -229,7 +229,12 @@ def run(protsfile,
     with open(alignment, 'w') as f:
         f.write('\n'.join(f">{head}\n{s}" for head, s in aln))
 
-    # map (pdb_chain, isite) to pdb_site or pdb_wildtype
+    # remove sites gapped in reference from `ref_pdb_site_map`
+    ref_pdb_site_map = (ref_pdb_site_map
+                        .dropna(axis=0, subset=[refprot.description])
+                        )
+
+    # map (pdb_chain, pdb_isite) to pdb_site or pdb_wildtype
     to_pdb = {}
     for valstr in ['pdb_site', 'pdb_wildtype']:
         to_pdb[valstr] = {('NaN', 'NaN'): 'NaN'}

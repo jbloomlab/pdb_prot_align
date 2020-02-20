@@ -6,6 +6,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com>`_.
 
+0.3.0
+------
+
+Added
+++++++
+* ``genbank`` module.
+
+* added ``returnval`` to ``nglview_struct.render_html``
+
+Fixed
++++++
+* Fixed bug when PDB has insertions relative to reference sequence.
+
+* Fixed bug if floats in residue number column for coloring structures.
+
 0.2.1
 ------
 
