@@ -1,0 +1,332 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pdb_prot_align.genbank &#8212; pdb_prot_align 0.3.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pdb_prot_align.genbank</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=======</span>
+<span class="sd">genbank</span>
+<span class="sd">=======</span>
+
+<span class="sd">Extract information from Genbank-format files.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">Bio.SeqFeature</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span> <span class="nn">Bio.SeqIO</span>
+<span class="kn">import</span> <span class="nn">Bio.SeqRecord</span>  <span class="c1"># noqa: F401</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="genbank_to_feature_df"><a class="viewcode-back" href="../../pdb_prot_align.genbank.html#pdb_prot_align.genbank.genbank_to_feature_df">[docs]</a><span class="k">def</span> <span class="nf">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span>
+                          <span class="n">multi_features</span><span class="p">,</span>
+                          <span class="o">*</span><span class="p">,</span>
+                          <span class="n">feature_color_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">featureless_sites</span><span class="o">=</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span>
+                          <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Genbank with annotated features to map of sites to features.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gb : BioPython.SeqRecord.SeqRecord or name of Genbank file</span>
+<span class="sd">        Contains features annotated by their `type`.</span>
+<span class="sd">    multi_features : {&#39;last&#39;, &#39;first&#39;, &#39;all&#39;, &#39;error&#39;}</span>
+<span class="sd">        What to do if a site is in multiple features? Assign it to &#39;last&#39; or</span>
+<span class="sd">        &#39;first&#39; feature (as ordered in `gb`) that it is part of, assign it</span>
+<span class="sd">        to &#39;all&#39; features it is part of, or raise an &#39;error&#39;.</span>
+<span class="sd">    feature_color_map : None or dict</span>
+<span class="sd">        If not `None`, add a column mappping each feature to a color. The</span>
+<span class="sd">        dict must have a key for each feature type in `gb`.</span>
+<span class="sd">    featureless_sites : {&#39;NaN&#39;, &#39;drop&#39;}</span>
+<span class="sd">        How to handle sites without features. Keep them with features of</span>
+<span class="sd">        `NaN`, or drop them from returned data frame.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Columns are &#39;isite&#39; (1, ... numbering), &#39;amino_acid&#39;, &#39;feature&#39;, and</span>
+<span class="sd">        optionally &#39;color&#39; if `feature_color_map` is not `None`. If mapping</span>
+<span class="sd">        sites to multiple features, the returned data frame is tidy.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; gb = Bio.SeqRecord.SeqRecord(</span>
+<span class="sd">    ...         seq=&#39;MGKLLIT&#39;,</span>
+<span class="sd">    ...         id=&#39;example&#39;,</span>
+<span class="sd">    ...         name=&#39;example&#39;,</span>
+<span class="sd">    ...         description=&#39;example&#39;,</span>
+<span class="sd">    ...         features=[Bio.SeqFeature.SeqFeature(</span>
+<span class="sd">    ...                     type=&#39;1to6&#39;,</span>
+<span class="sd">    ...                     location=Bio.SeqFeature.FeatureLocation(0, 6)),</span>
+<span class="sd">    ...                   Bio.SeqFeature.SeqFeature(</span>
+<span class="sd">    ...                     type=&#39;1to2&#39;,</span>
+<span class="sd">    ...                     location=Bio.SeqFeature.FeatureLocation(0, 2)),</span>
+<span class="sd">    ...                   Bio.SeqFeature.SeqFeature(</span>
+<span class="sd">    ...                     type=&#39;4to6&#39;,</span>
+<span class="sd">    ...                     location=Bio.SeqFeature.FeatureLocation(3, 6)),</span>
+<span class="sd">    ...                   ],</span>
+<span class="sd">    ...         )</span>
+
+<span class="sd">    &gt;&gt;&gt; genbank_to_feature_df(gb, &#39;last&#39;)</span>
+<span class="sd">       isite amino_acid feature</span>
+<span class="sd">    0      1          M    1to2</span>
+<span class="sd">    1      2          G    1to2</span>
+<span class="sd">    2      3          K    1to6</span>
+<span class="sd">    3      4          L    4to6</span>
+<span class="sd">    4      5          L    4to6</span>
+<span class="sd">    5      6          I    4to6</span>
+<span class="sd">    6      7          T     NaN</span>
+
+<span class="sd">    &gt;&gt;&gt; genbank_to_feature_df(gb, &#39;last&#39;, featureless_sites=&#39;drop&#39;)</span>
+<span class="sd">       isite amino_acid feature</span>
+<span class="sd">    0      1          M    1to2</span>
+<span class="sd">    1      2          G    1to2</span>
+<span class="sd">    2      3          K    1to6</span>
+<span class="sd">    3      4          L    4to6</span>
+<span class="sd">    4      5          L    4to6</span>
+<span class="sd">    5      6          I    4to6</span>
+
+<span class="sd">    &gt;&gt;&gt; genbank_to_feature_df(gb, &#39;first&#39;)</span>
+<span class="sd">       isite amino_acid feature</span>
+<span class="sd">    0      1          M    1to6</span>
+<span class="sd">    1      2          G    1to6</span>
+<span class="sd">    2      3          K    1to6</span>
+<span class="sd">    3      4          L    1to6</span>
+<span class="sd">    4      5          L    1to6</span>
+<span class="sd">    5      6          I    1to6</span>
+<span class="sd">    6      7          T     NaN</span>
+
+<span class="sd">    &gt;&gt;&gt; genbank_to_feature_df(gb, &#39;all&#39;)</span>
+<span class="sd">        isite amino_acid feature</span>
+<span class="sd">    0       1          M    1to6</span>
+<span class="sd">    1       1          M    1to2</span>
+<span class="sd">    2       2          G    1to6</span>
+<span class="sd">    3       2          G    1to2</span>
+<span class="sd">    4       3          K    1to6</span>
+<span class="sd">    5       4          L    1to6</span>
+<span class="sd">    6       4          L    4to6</span>
+<span class="sd">    7       5          L    1to6</span>
+<span class="sd">    8       5          L    4to6</span>
+<span class="sd">    9       6          I    1to6</span>
+<span class="sd">    10      6          I    4to6</span>
+<span class="sd">    11      7          T     NaN</span>
+
+<span class="sd">    &gt;&gt;&gt; genbank_to_feature_df(gb, &#39;error&#39;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: site 1 in multiple features</span>
+
+<span class="sd">    &gt;&gt;&gt; feature_color_map = {&#39;1to6&#39;: &#39;red&#39;, &#39;1to2&#39;: &#39;blue&#39;, &#39;4to6&#39;: &#39;green&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; genbank_to_feature_df(gb, &#39;last&#39;, feature_color_map=feature_color_map)</span>
+<span class="sd">       isite amino_acid feature  color</span>
+<span class="sd">    0      1          M    1to2   blue</span>
+<span class="sd">    1      2          G    1to2   blue</span>
+<span class="sd">    2      3          K    1to6    red</span>
+<span class="sd">    3      4          L    4to6  green</span>
+<span class="sd">    4      5          L    4to6  green</span>
+<span class="sd">    5      6          I    4to6  green</span>
+<span class="sd">    6      7          T     NaN    NaN</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">gb</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no `gb` file:</span><span class="se">\n</span><span class="si">{gb}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;genbank&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqRecord</span><span class="o">.</span><span class="n">SeqRecord</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`gb` not str or SeqRecord:</span><span class="se">\n</span><span class="si">{gb}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">multi_features</span> <span class="o">==</span> <span class="s1">&#39;last&#39;</span><span class="p">:</span>
+        <span class="n">featurelist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">gb</span><span class="o">.</span><span class="n">features</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">featurelist</span> <span class="o">=</span> <span class="n">gb</span><span class="o">.</span><span class="n">features</span>
+
+    <span class="n">site</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 0-indexed sites</span>
+    <span class="n">feature</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">nfeatures_for_site</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gb</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">featurelist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">feat</span><span class="p">:</span>
+                <span class="n">site</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                <span class="n">feature</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">multi_features</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">}:</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">multi_features</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
+                    <span class="n">nfeatures_for_site</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">nfeatures_for_site</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;site {r + 1} in multiple features&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">multi_features</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;bad `multi_features` </span><span class="si">{multi_features}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">featureless_sites</span> <span class="o">==</span> <span class="s1">&#39;NaN&#39;</span><span class="p">:</span>
+        <span class="n">site_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gb</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">site_set</span><span class="p">:</span>
+                <span class="n">site</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                <span class="n">feature</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">featureless_sites</span> <span class="o">!=</span> <span class="s1">&#39;drop&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;invalid `featureless_sites` </span><span class="si">{featureless_sites}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;site&#39;</span><span class="p">:</span> <span class="n">site</span><span class="p">,</span>
+                        <span class="s1">&#39;feature&#39;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+                        <span class="p">})</span>
+          <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">isite</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;site&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                  <span class="n">amino_acid</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;site&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">gb</span><span class="o">.</span><span class="n">seq</span><span class="p">))),</span>
+                  <span class="p">)</span>
+          <span class="p">[[</span><span class="s1">&#39;isite&#39;</span><span class="p">,</span> <span class="s1">&#39;amino_acid&#39;</span><span class="p">,</span> <span class="s1">&#39;feature&#39;</span><span class="p">]]</span>
+          <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;isite&#39;</span><span class="p">)</span>
+          <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">feature_color_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">feat</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">feat</span> <span class="ow">in</span> <span class="n">featurelist</span>
+                   <span class="k">if</span> <span class="n">feat</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">feature_color_map</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`feature_color_map` lacks features:</span><span class="se">\n</span><span class="si">{missing}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;feature&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">feature_color_map</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>nglview_struct &#8212; pdb_prot_align 0.2.1 documentation</title>
+    <title>nglview_struct &#8212; pdb_prot_align 0.3.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -66,8 +66,8 @@ str and are hex, then they need to be like this ‘#25828e’.</p></li>
 
 <dl class="function">
 <dt id="pdb_prot_align.nglview_struct.render_html">
-<code class="sig-prename descclassname">pdb_prot_align.nglview_struct.</code><code class="sig-name descname">render_html</code><span class="sig-paren">(</span><em class="sig-param">view</em>, <em class="sig-param">*</em>, <em class="sig-param">html_file=None</em>, <em class="sig-param">orientation=None</em>, <em class="sig-param">remove_widget_view=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/nglview_struct.html#render_html"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.nglview_struct.render_html" title="Permalink to this definition">¶</a></dt>
-<dd><p>Render widget to HTML display.</p>
+<code class="sig-prename descclassname">pdb_prot_align.nglview_struct.</code><code class="sig-name descname">render_html</code><span class="sig-paren">(</span><em class="sig-param">view</em>, <em class="sig-param">*</em>, <em class="sig-param">html_file=None</em>, <em class="sig-param">orientation=None</em>, <em class="sig-param">remove_widget_view=False</em>, <em class="sig-param">returnval='display'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/nglview_struct.html#render_html"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.nglview_struct.render_html" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render widget to HTML.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -76,17 +76,19 @@ str and are hex, then they need to be like this ‘#25828e’.</p></li>
 <li><p><strong>orientation</strong> (<em>list</em>) – Set to this camera orientation (list of 16 numbers), fixing this bug:
 <a class="reference external" href="https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933">https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933</a>
 You can get the desired orientation by manually manipulating the widget
-in a Jupyter notebook and then calling <cite>view._get_orientation</cite>.</p></li>
+in a Jupyter notebook and then calling <cite>view._camera_orientation</cite>.</p></li>
 <li><p><strong>remove_widget_view</strong> (<em>bool</em>) – Remove the widget view lines, so the HTML just gives the widget state.
 Helpful if you want to embed widgets in HTML rendering without showing
 another time.</p></li>
+<li><p><strong>returnval</strong> (<em>{'display'</em><em>, </em><em>'HTML'</em><em>, </em><em>'none'}</em>) – Return value (see <a href="#id1"><span class="problematic" id="id2">Returns_</span></a>).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A handle that displays the HTML structure in a Jupyter notebook.</p>
+<dd class="field-even"><p>A handle for a Jupyter notebook, or <cite>None</cite> depending on value
+of <cite>returnval</cite>.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>IPython.display.DisplayHandle</p>
+<dd class="field-odd"><p>IPython.display.DisplayHandle or IPython.display.HTML or None.</p>
 </dd>
 </dl>
 </dd></dl>

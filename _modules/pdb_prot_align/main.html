@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.2.1 documentation</title>
+    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.3.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -263,7 +263,12 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alignment</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{head}</span><span class="se">\n</span><span class="si">{s}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">))</span>
 
-    <span class="c1"># map (pdb_chain, isite) to pdb_site or pdb_wildtype</span>
+    <span class="c1"># remove sites gapped in reference from `ref_pdb_site_map`</span>
+    <span class="n">ref_pdb_site_map</span> <span class="o">=</span> <span class="p">(</span><span class="n">ref_pdb_site_map</span>
+                        <span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">])</span>
+                        <span class="p">)</span>
+
+    <span class="c1"># map (pdb_chain, pdb_isite) to pdb_site or pdb_wildtype</span>
     <span class="n">to_pdb</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">valstr</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pdb_site&#39;</span><span class="p">,</span> <span class="s1">&#39;pdb_wildtype&#39;</span><span class="p">]:</span>
         <span class="n">to_pdb</span><span class="p">[</span><span class="n">valstr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{(</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">):</span> <span class="s1">&#39;NaN&#39;</span><span class="p">}</span>

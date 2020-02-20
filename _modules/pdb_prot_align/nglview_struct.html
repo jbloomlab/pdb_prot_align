@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pdb_prot_align.nglview_struct &#8212; pdb_prot_align 0.2.1 documentation</title>
+    <title>pdb_prot_align.nglview_struct &#8212; pdb_prot_align 0.3.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -143,6 +143,10 @@
     <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">sites_df</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
         <span class="n">chain</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tup</span><span class="p">,</span> <span class="n">chain_col</span><span class="p">)</span>
         <span class="n">resi</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tup</span><span class="p">,</span> <span class="n">site_col</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resi</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">resi</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resi</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;non-integer residue </span><span class="si">{resi}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">resi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resi</span><span class="p">)</span>
         <span class="n">sel_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;:</span><span class="si">{chain}</span><span class="s2"> and </span><span class="si">{resi}</span><span class="s2">&quot;</span>
         <span class="n">color</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tup</span><span class="p">,</span> <span class="n">color_col</span><span class="p">)</span>
         <span class="n">colorscheme</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">color</span><span class="p">,</span> <span class="n">sel_str</span><span class="p">])</span>
@@ -155,8 +159,9 @@
                 <span class="n">html_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">remove_widget_view</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">returnval</span><span class="o">=</span><span class="s1">&#39;display&#39;</span><span class="p">,</span>
                 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Render widget to HTML display.</span>
+    <span class="sd">&quot;&quot;&quot;Render widget to HTML.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -168,16 +173,19 @@
 <span class="sd">        Set to this camera orientation (list of 16 numbers), fixing this bug:</span>
 <span class="sd">        https://github.com/dwhswenson/contact_map/pull/62#issuecomment-583788933</span>
 <span class="sd">        You can get the desired orientation by manually manipulating the widget</span>
-<span class="sd">        in a Jupyter notebook and then calling `view._get_orientation`.</span>
+<span class="sd">        in a Jupyter notebook and then calling `view._camera_orientation`.</span>
 <span class="sd">    remove_widget_view : bool</span>
 <span class="sd">        Remove the widget view lines, so the HTML just gives the widget state.</span>
 <span class="sd">        Helpful if you want to embed widgets in HTML rendering without showing</span>
 <span class="sd">        another time.</span>
+<span class="sd">    returnval : {&#39;display&#39;, &#39;HTML&#39;, &#39;none&#39;}</span>
+<span class="sd">        Return value (see Returns_).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    IPython.display.DisplayHandle</span>
-<span class="sd">        A handle that displays the HTML structure in a Jupyter notebook.</span>
+<span class="sd">    IPython.display.DisplayHandle or IPython.display.HTML or None.</span>
+<span class="sd">        A handle for a Jupyter notebook, or `None` depending on value</span>
+<span class="sd">        of `returnval`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w+&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.html&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -208,7 +216,14 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">html_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_html</span><span class="p">:</span>
             <span class="n">f_html</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html_text</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">html_text</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="n">returnval</span> <span class="o">==</span> <span class="s1">&#39;display&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">html_text</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">returnval</span> <span class="o">==</span> <span class="s1">&#39;HTML&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">HTML</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">html_text</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">returnval</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;invalid `returnval` </span><span class="si">{returnval}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

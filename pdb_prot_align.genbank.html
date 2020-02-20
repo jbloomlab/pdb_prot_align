@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>genbank &#8212; pdb_prot_align 0.3.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="main" href="pdb_prot_align.main.html" />
+    <link rel="prev" title="colorschemes" href="pdb_prot_align.colorschemes.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-pdb_prot_align.genbank"></span><div class="section" id="genbank">
+<h1>genbank<a class="headerlink" href="#genbank" title="Permalink to this headline">¶</a></h1>
+<p>Extract information from Genbank-format files.</p>
+<dl class="function">
+<dt id="pdb_prot_align.genbank.genbank_to_feature_df">
+<code class="sig-prename descclassname">pdb_prot_align.genbank.</code><code class="sig-name descname">genbank_to_feature_df</code><span class="sig-paren">(</span><em class="sig-param">gb</em>, <em class="sig-param">multi_features</em>, <em class="sig-param">*</em>, <em class="sig-param">feature_color_map=None</em>, <em class="sig-param">featureless_sites='NaN'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/genbank.html#genbank_to_feature_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.genbank.genbank_to_feature_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Genbank with annotated features to map of sites to features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gb</strong> (<em>BioPython.SeqRecord.SeqRecord</em><em> or </em><em>name of Genbank file</em>) – Contains features annotated by their <cite>type</cite>.</p></li>
+<li><p><strong>multi_features</strong> (<em>{'last'</em><em>, </em><em>'first'</em><em>, </em><em>'all'</em><em>, </em><em>'error'}</em>) – What to do if a site is in multiple features? Assign it to ‘last’ or
+‘first’ feature (as ordered in <cite>gb</cite>) that it is part of, assign it
+to ‘all’ features it is part of, or raise an ‘error’.</p></li>
+<li><p><strong>feature_color_map</strong> (<em>None</em><em> or </em><em>dict</em>) – If not <cite>None</cite>, add a column mappping each feature to a color. The
+dict must have a key for each feature type in <cite>gb</cite>.</p></li>
+<li><p><strong>featureless_sites</strong> (<em>{'NaN'</em><em>, </em><em>'drop'}</em>) – How to handle sites without features. Keep them with features of
+<cite>NaN</cite>, or drop them from returned data frame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Columns are ‘isite’ (1, … numbering), ‘amino_acid’, ‘feature’, and
+optionally ‘color’ if <cite>feature_color_map</cite> is not <cite>None</cite>. If mapping
+sites to multiple features, the returned data frame is tidy.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gb</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqRecord</span><span class="o">.</span><span class="n">SeqRecord</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">seq</span><span class="o">=</span><span class="s1">&#39;MGKLLIT&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">features</span><span class="o">=</span><span class="p">[</span><span class="n">Bio</span><span class="o">.</span><span class="n">SeqFeature</span><span class="o">.</span><span class="n">SeqFeature</span><span class="p">(</span>
+<span class="gp">... </span>                    <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1to6&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">location</span><span class="o">=</span><span class="n">Bio</span><span class="o">.</span><span class="n">SeqFeature</span><span class="o">.</span><span class="n">FeatureLocation</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)),</span>
+<span class="gp">... </span>                  <span class="n">Bio</span><span class="o">.</span><span class="n">SeqFeature</span><span class="o">.</span><span class="n">SeqFeature</span><span class="p">(</span>
+<span class="gp">... </span>                    <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1to2&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">location</span><span class="o">=</span><span class="n">Bio</span><span class="o">.</span><span class="n">SeqFeature</span><span class="o">.</span><span class="n">FeatureLocation</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+<span class="gp">... </span>                  <span class="n">Bio</span><span class="o">.</span><span class="n">SeqFeature</span><span class="o">.</span><span class="n">SeqFeature</span><span class="p">(</span>
+<span class="gp">... </span>                    <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;4to6&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">location</span><span class="o">=</span><span class="n">Bio</span><span class="o">.</span><span class="n">SeqFeature</span><span class="o">.</span><span class="n">FeatureLocation</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)),</span>
+<span class="gp">... </span>                  <span class="p">],</span>
+<span class="gp">... </span>        <span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">)</span>
+<span class="go">   isite amino_acid feature</span>
+<span class="go">0      1          M    1to2</span>
+<span class="go">1      2          G    1to2</span>
+<span class="go">2      3          K    1to6</span>
+<span class="go">3      4          L    4to6</span>
+<span class="go">4      5          L    4to6</span>
+<span class="go">5      6          I    4to6</span>
+<span class="go">6      7          T     NaN</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">featureless_sites</span><span class="o">=</span><span class="s1">&#39;drop&#39;</span><span class="p">)</span>
+<span class="go">   isite amino_acid feature</span>
+<span class="go">0      1          M    1to2</span>
+<span class="go">1      2          G    1to2</span>
+<span class="go">2      3          K    1to6</span>
+<span class="go">3      4          L    4to6</span>
+<span class="go">4      5          L    4to6</span>
+<span class="go">5      6          I    4to6</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">)</span>
+<span class="go">   isite amino_acid feature</span>
+<span class="go">0      1          M    1to6</span>
+<span class="go">1      2          G    1to6</span>
+<span class="go">2      3          K    1to6</span>
+<span class="go">3      4          L    1to6</span>
+<span class="go">4      5          L    1to6</span>
+<span class="go">5      6          I    1to6</span>
+<span class="go">6      7          T     NaN</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="go">    isite amino_acid feature</span>
+<span class="go">0       1          M    1to6</span>
+<span class="go">1       1          M    1to2</span>
+<span class="go">2       2          G    1to6</span>
+<span class="go">3       2          G    1to2</span>
+<span class="go">4       3          K    1to6</span>
+<span class="go">5       4          L    1to6</span>
+<span class="go">6       4          L    4to6</span>
+<span class="go">7       5          L    1to6</span>
+<span class="go">8       5          L    4to6</span>
+<span class="go">9       6          I    1to6</span>
+<span class="go">10      6          I    4to6</span>
+<span class="go">11      7          T     NaN</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">ValueError</span>: <span class="n">site 1 in multiple features</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">feature_color_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1to6&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;1to2&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;4to6&#39;</span><span class="p">:</span> <span class="s1">&#39;green&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">feature_color_map</span><span class="o">=</span><span class="n">feature_color_map</span><span class="p">)</span>
+<span class="go">   isite amino_acid feature  color</span>
+<span class="go">0      1          M    1to2   blue</span>
+<span class="go">1      2          G    1to2   blue</span>
+<span class="go">2      3          K    1to6    red</span>
+<span class="go">3      4          L    4to6  green</span>
+<span class="go">4      5          L    4to6  green</span>
+<span class="go">5      6          I    4to6  green</span>
+<span class="go">6      7          T     NaN    NaN</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/BloomLogo.jpg" alt="Logo"/>
+    
+    <h1 class="logo logo-name">pdb_prot_align</h1>
+    
+  </a>
+</p>
+
+
+
+<p class="blurb">Align proteins to PDB chains</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jbloomlab&repo=pdb_prot_align&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/jbloomlab/pdb_prot_align">
+    <img
+        alt="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+        src="https://secure.travis-ci.org/jbloomlab/pdb_prot_align.svg?branch=master"
+    />
+</a>
+</p>
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">pdb_prot_align documentation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pdb_prot_align.html">pdb_prot_align package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="package_index.html">Package index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgments.html">Acknowledgements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="pdb_prot_align.html">pdb_prot_align package</a><ul>
+      <li>Previous: <a href="pdb_prot_align.colorschemes.html" title="previous chapter">colorschemes</a></li>
+      <li>Next: <a href="pdb_prot_align.main.html" title="next chapter">main</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019--2020.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/pdb_prot_align.genbank.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/jbloomlab/pdb_prot_align" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
