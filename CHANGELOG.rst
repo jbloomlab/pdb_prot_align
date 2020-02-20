@@ -13,6 +13,8 @@ Added
 ++++++
 * ``genbank`` module.
 
+* added ``returnval`` to ``nglview_struct.render_html``
+
 Fixed
 +++++
 * Fixed bug when PDB has insertions relative to reference sequence.

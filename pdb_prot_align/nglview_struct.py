@@ -125,8 +125,9 @@ def render_html(view,
                 html_file=None,
                 orientation=None,
                 remove_widget_view=False,
+                returnval='display',
                 ):
-    """Render widget to HTML display.
+    """Render widget to HTML.
 
     Parameters
     ----------
@@ -143,11 +144,14 @@ def render_html(view,
         Remove the widget view lines, so the HTML just gives the widget state.
         Helpful if you want to embed widgets in HTML rendering without showing
         another time.
+    returnval : {'display', 'HTML', 'none'}
+        Return value (see Returns_).
 
     Returns
     -------
-    IPython.display.DisplayHandle
-        A handle that displays the HTML structure in a Jupyter notebook.
+    IPython.display.DisplayHandle or IPython.display.HTML or None.
+        A handle for a Jupyter notebook, or `None` depending on value
+        of `returnval`.
 
     """
     with tempfile.TemporaryFile(mode='w+', suffix='.html') as f:
@@ -178,7 +182,14 @@ def render_html(view,
         with open(html_file, 'w') as f_html:
             f_html.write(html_text)
 
-    return IPython.display.display(IPython.display.HTML(data=html_text))
+    if returnval == 'display':
+        return IPython.display.display(IPython.display.HTML(data=html_text))
+    elif returnval == 'HTML':
+        return IPython.display.HTML(data=html_text)
+    elif returnval == 'none':
+        return None
+    else:
+        raise ValueError(f"invalid `returnval` {returnval}")
 
 
 if __name__ == '__main__':
