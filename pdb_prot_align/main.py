@@ -98,6 +98,14 @@ _ARGS = {
                       'computation of stats in "sites.csv" output files',
               'type': _str2bool,
               },
+         'mafft': {
+             'required': False,
+             'default': 'mafft',
+             'help': 'path to `mafft`, potentially with additional args '
+                     'such as "mafft --reorder" (if multiple args, it all '
+                     'needs to be in quotes)',
+             'type': str,
+             },
          }
 
 
@@ -125,6 +133,7 @@ def run(protsfile,
         outprefix,
         ignore_gaps=True,
         drop_pdb=True,
+        mafft='mafft',
         ):
     """Run main function to align proteins to reference and PDB chain(s).
 
@@ -201,8 +210,9 @@ def run(protsfile,
 
     # make alignment of all proteins and the PDB sequence
     print(f"Using `mafft` to align sequences to {alignment_unstripped}")
-    aln = pdb_prot_align.utils.align_prots_mafft(prots +
-                                                 list(pdb_prots.values()))
+    aln = pdb_prot_align.utils.align_prots_mafft(
+                                    prots=prots + list(pdb_prots.values()),
+                                    mafft=mafft)
     assert len(aln) == len(prots) + len(pdb_prots)
     Bio.AlignIO.write(aln, alignment_unstripped, 'fasta')
 
