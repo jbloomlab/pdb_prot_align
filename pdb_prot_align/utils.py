@@ -181,10 +181,10 @@ def align_prots_mafft(prots, *, mafft='mafft'):
     ----------
     prots : list
         List of sequences as `Biopython.SeqRecord.SeqRecord` objects.
-    alignmentfile : str
-        Name of created FASTA alignment.
     mafft : str
-        Command that resolves to ``mafft`` executable.
+        Command that resolves to ``mafft`` executable, potentially
+        with arbitrary additional options, such as
+        ``mafft --reorder``.
 
     Returns
     -------
@@ -199,6 +199,10 @@ def align_prots_mafft(prots, *, mafft='mafft'):
             raise ValueError(f"invalid amino acids for {p.description}\n" +
                              str(p.seq))
 
+    mafft_cmds = mafft.split()
+    mafft = mafft_cmds[0]
+    mafft_args = [arg for arg in mafft_cmds[1:] if arg != '--amino']
+
     try:
         _ = subprocess.run([mafft, '--version'],
                            check=True,
@@ -211,7 +215,7 @@ def align_prots_mafft(prots, *, mafft='mafft'):
     with tempfile.NamedTemporaryFile('w') as prots_in:
         Bio.SeqIO.write(prots, prots_in, 'fasta')
         prots_in.flush()
-        res = subprocess.run([mafft, '--amino', prots_in.name],
+        res = subprocess.run([mafft, *mafft_args, '--amino', prots_in.name],
                              stdout=subprocess.PIPE,
                              stderr=subprocess.DEVNULL,
                              universal_newlines=True,
