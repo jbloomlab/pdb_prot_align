@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Influenza HAs (H3, H4, H14 subtypes) &#8212; pdb_prot_align 0.3.0 documentation</title>
+    <title>Influenza HAs (H3, H4, H14 subtypes) &#8212; pdb_prot_align 0.4.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -311,7 +311,7 @@ REMARK  -------------------------------------------------------------
 </pre></div></div>
 </div>
 <p>For our reference sequence in the alignment, we choose the H3 HA from <em>A/England/321/1977</em>.</p>
-<p>Run <code class="docutils literal notranslate"><span class="pre">pdb_prot_align</span></code>, sending the output files to the subdirectory <code class="docutils literal notranslate"><span class="pre">./output_files/</span></code> (which needs to have already been created):</p>
+<p>Run <code class="docutils literal notranslate"><span class="pre">pdb_prot_align</span></code>, sending the output files to the subdirectory <code class="docutils literal notranslate"><span class="pre">./output_files/</span></code> (which needs to have already been created). We add the <code class="docutils literal notranslate"><span class="pre">--reorder</span></code> command to our call of <code class="docutils literal notranslate"><span class="pre">mafft</span></code>:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -321,7 +321,8 @@ REMARK  -------------------------------------------------------------
                  --refprot_regex A/England/321/1977 \
                  --pdbfile input_files/4o5n_trimer.pdb \
                  --chain_ids A B C D E F \
-                 --outprefix output_files/HA_H3_H4_H14
+                 --outprefix output_files/HA_H3_H4_H14 \
+                 --mafft &quot;mafft --reorder&quot;
 </pre></div>
 </div>
 </div>
@@ -331,7 +332,7 @@ REMARK  -------------------------------------------------------------
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 
-Running `pdb_prot_align` 0.2.0
+Running `pdb_prot_align` 0.4.0
 
 Parsing PDB input_files/4o5n_trimer.pdb chains A B C D E F
 For chain A, parsed 317 residues, ranging from 9 to 325 in PDB numbering.

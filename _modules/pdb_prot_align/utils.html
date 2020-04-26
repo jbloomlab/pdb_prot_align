@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pdb_prot_align.utils &#8212; pdb_prot_align 0.3.0 documentation</title>
+    <title>pdb_prot_align.utils &#8212; pdb_prot_align 0.4.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -215,10 +215,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    prots : list</span>
 <span class="sd">        List of sequences as `Biopython.SeqRecord.SeqRecord` objects.</span>
-<span class="sd">    alignmentfile : str</span>
-<span class="sd">        Name of created FASTA alignment.</span>
 <span class="sd">    mafft : str</span>
-<span class="sd">        Command that resolves to ``mafft`` executable.</span>
+<span class="sd">        Command that resolves to ``mafft`` executable, potentially</span>
+<span class="sd">        with arbitrary additional options, such as</span>
+<span class="sd">        ``mafft --reorder``.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -233,6 +233,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;invalid amino acids for </span><span class="si">{p.description}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
                              <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">seq</span><span class="p">))</span>
 
+    <span class="n">mafft_cmds</span> <span class="o">=</span> <span class="n">mafft</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">mafft</span> <span class="o">=</span> <span class="n">mafft_cmds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">mafft_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">mafft_cmds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">arg</span> <span class="o">!=</span> <span class="s1">&#39;--amino&#39;</span><span class="p">]</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">_</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">mafft</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">],</span>
                            <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -245,7 +249,7 @@
     <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">prots_in</span><span class="p">:</span>
         <span class="n">Bio</span><span class="o">.</span><span class="n">SeqIO</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prots</span><span class="p">,</span> <span class="n">prots_in</span><span class="p">,</span> <span class="s1">&#39;fasta&#39;</span><span class="p">)</span>
         <span class="n">prots_in</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">mafft</span><span class="p">,</span> <span class="s1">&#39;--amino&#39;</span><span class="p">,</span> <span class="n">prots_in</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">mafft</span><span class="p">,</span> <span class="o">*</span><span class="n">mafft_args</span><span class="p">,</span> <span class="s1">&#39;--amino&#39;</span><span class="p">,</span> <span class="n">prots_in</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                              <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                              <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
                              <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

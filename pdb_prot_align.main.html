@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>main &#8212; pdb_prot_align 0.3.0 documentation</title>
+    <title>main &#8212; pdb_prot_align 0.4.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -46,7 +46,7 @@ the <a class="reference internal" href="#pdb_prot_align.main.run" title="pdb_pro
 
 <dl class="function">
 <dt id="pdb_prot_align.main.run">
-<code class="sig-prename descclassname">pdb_prot_align.main.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">protsfile</em>, <em class="sig-param">refprot_regex</em>, <em class="sig-param">pdbfile</em>, <em class="sig-param">chain_ids</em>, <em class="sig-param">outprefix</em>, <em class="sig-param">ignore_gaps=True</em>, <em class="sig-param">drop_pdb=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/main.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.main.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pdb_prot_align.main.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">protsfile</em>, <em class="sig-param">refprot_regex</em>, <em class="sig-param">pdbfile</em>, <em class="sig-param">chain_ids</em>, <em class="sig-param">outprefix</em>, <em class="sig-param">ignore_gaps=True</em>, <em class="sig-param">drop_pdb=True</em>, <em class="sig-param">mafft='mafft'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pdb_prot_align/main.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pdb_prot_align.main.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run main function to align proteins to reference and PDB chain(s).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -72,6 +72,8 @@ frequency of amino acid)</p></li>
 acids, entropy</p></li>
 <li><p><strong>drop_pdb</strong> (<em>bool</em>) – drop PDB protein chains from “alignment.fa” and computation of stats
 in “sites.csv” output files</p></li>
+<li><p><strong>mafft</strong> (<em>str</em>) – path to <cite>mafft</cite>, potentially with additional args such as “mafft
+–reorder” (if multiple args, it all needs to be in quotes)</p></li>
 </ul>
 </dd>
 </dl>

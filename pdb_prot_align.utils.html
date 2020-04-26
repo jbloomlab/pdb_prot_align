@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>utils &#8212; pdb_prot_align 0.3.0 documentation</title>
+    <title>utils &#8212; pdb_prot_align 0.4.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -44,8 +44,9 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prots</strong> (<em>list</em>) – List of sequences as <cite>Biopython.SeqRecord.SeqRecord</cite> objects.</p></li>
-<li><p><strong>alignmentfile</strong> (<em>str</em>) – Name of created FASTA alignment.</p></li>
-<li><p><strong>mafft</strong> (<em>str</em>) – Command that resolves to <code class="docutils literal notranslate"><span class="pre">mafft</span></code> executable.</p></li>
+<li><p><strong>mafft</strong> (<em>str</em>) – Command that resolves to <code class="docutils literal notranslate"><span class="pre">mafft</span></code> executable, potentially
+with arbitrary additional options, such as
+<code class="docutils literal notranslate"><span class="pre">mafft</span> <span class="pre">--reorder</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
