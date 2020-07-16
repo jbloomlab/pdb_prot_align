@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.4.0 documentation</title>
+    <title>pdb_prot_align.main &#8212; pdb_prot_align 0.5.0 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -132,6 +131,13 @@
                       <span class="s1">&#39;computation of stats in &quot;sites.csv&quot; output files&#39;</span><span class="p">,</span>
               <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">_str2bool</span><span class="p">,</span>
               <span class="p">},</span>
+         <span class="s1">&#39;drop_refprot&#39;</span><span class="p">:</span> <span class="p">{</span>
+              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+              <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+              <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;drop reference protein from &quot;alignment.fa&quot; and &#39;</span>
+                      <span class="s1">&#39;computation of stats in &quot;sites.csv&quot; output files&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">_str2bool</span><span class="p">,</span>
+              <span class="p">},</span>
          <span class="s1">&#39;mafft&#39;</span><span class="p">:</span> <span class="p">{</span>
              <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
              <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;mafft&#39;</span><span class="p">,</span>
@@ -167,6 +173,7 @@
         <span class="n">outprefix</span><span class="p">,</span>
         <span class="n">ignore_gaps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">drop_pdb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">drop_refprot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">mafft</span><span class="o">=</span><span class="s1">&#39;mafft&#39;</span><span class="p">,</span>
         <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run main function to align proteins to reference and PDB chain(s).</span>
@@ -258,17 +265,32 @@
     <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_pdb_site_map</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">description</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">refprot</span><span class="p">,</span> <span class="o">*</span><span class="n">pdb_prots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
 
-    <span class="c1"># remove PDB sequences?</span>
-    <span class="k">if</span> <span class="n">drop_pdb</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dropping PDB chains from alignment&#39;</span><span class="p">)</span>
-        <span class="n">aln</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">description</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pdb_prot_headers</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span>
-
     <span class="c1"># strip gaps relative to reference sequence</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stripping gaps relative to reference </span><span class="si">{refprot.description}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">aln</span> <span class="o">=</span> <span class="n">pdb_prot_align</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">strip_gaps_to_ref</span><span class="p">(</span><span class="n">aln</span><span class="p">,</span>
                                                  <span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
     <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">refprot</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">)</span>
+
+    <span class="c1"># remove PDB sequences?</span>
+    <span class="k">if</span> <span class="n">drop_pdb</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dropping PDB chains from alignment&#39;</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span>
+        <span class="n">aln</span> <span class="o">=</span> <span class="p">[(</span><span class="n">head</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span> <span class="k">if</span> <span class="n">head</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pdb_prot_headers</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prots</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdb_prot_headers</span><span class="p">)</span>
+
+    <span class="c1"># remove reference protein?</span>
+    <span class="k">if</span> <span class="n">drop_refprot</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dropping reference protein from alignment&#39;</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span>
+        <span class="n">aln</span> <span class="o">=</span> <span class="p">[(</span><span class="n">head</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span> <span class="k">if</span> <span class="n">head</span> <span class="o">!=</span> <span class="n">refprot</span><span class="o">.</span><span class="n">description</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">aln</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">r</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">refprot</span><span class="p">))):</span>
+            <span class="k">if</span> <span class="n">ignore_gaps</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Some sites all gaps after dropping refprot. &#39;</span>
+                                 <span class="s1">&#39;To use `drop_refprot=True` for this &#39;</span>
+                                 <span class="s1">&#39;alignment, also use `ignore_gaps=False`&#39;</span><span class="p">)</span>
+
+    <span class="c1"># write alignment</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing gap-stripped alignment to </span><span class="si">{alignment}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alignment</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt;</span><span class="si">{head}</span><span class="se">\n</span><span class="si">{s}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">))</span>
@@ -376,7 +398,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Writing CSV with detailed information to </span><span class="si">{csv}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.5f</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Program complete.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Program complete.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <span class="c1"># complete docs for `run` with parameter specs parsed from `_ARGS`</span>
@@ -479,7 +501,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -496,7 +518,7 @@
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

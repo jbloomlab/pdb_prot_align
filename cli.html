@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Command-line interface &#8212; pdb_prot_align 0.4.0 documentation</title>
+    <title>Command-line interface &#8212; pdb_prot_align 0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Examples" href="examples.html" />
@@ -45,7 +44,7 @@ See below for usage.</p>
                       <span class="n">REFPROT_REGEX</span> <span class="o">--</span><span class="n">pdbfile</span> <span class="n">PDBFILE</span> <span class="o">--</span><span class="n">chain_ids</span> <span class="n">CHAIN_IDS</span>
                       <span class="p">[</span><span class="n">CHAIN_IDS</span> <span class="o">...</span><span class="p">]</span> <span class="o">--</span><span class="n">outprefix</span> <span class="n">OUTPREFIX</span>
                       <span class="p">[</span><span class="o">--</span><span class="n">ignore_gaps</span> <span class="n">IGNORE_GAPS</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">drop_pdb</span> <span class="n">DROP_PDB</span><span class="p">]</span>
-                      <span class="p">[</span><span class="o">--</span><span class="n">mafft</span> <span class="n">MAFFT</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">--</span><span class="n">drop_refprot</span> <span class="n">DROP_REFPROT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">mafft</span> <span class="n">MAFFT</span><span class="p">]</span>
 </pre></div>
 </div>
 <div class="section" id="Named Arguments">
@@ -76,6 +75,10 @@ See below for usage.</p>
 <dt><kbd>--drop_pdb</kbd></dt>
 <dd><p>drop PDB protein chains from “alignment.fa” and computation of stats in “sites.csv” output files</p>
 <p>Default: True</p>
+</dd>
+<dt><kbd>--drop_refprot</kbd></dt>
+<dd><p>drop reference protein from “alignment.fa” and computation of stats in “sites.csv” output files</p>
+<p>Default: False</p>
 </dd>
 <dt><kbd>--mafft</kbd></dt>
 <dd><p>path to <cite>mafft</cite>, potentially with additional args such as “mafft –reorder” (if multiple args, it all needs to be in quotes)</p>
@@ -161,7 +164,7 @@ See below for usage.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -178,7 +181,7 @@ See below for usage.</p>
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

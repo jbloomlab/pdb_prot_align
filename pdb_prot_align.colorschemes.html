@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>colorschemes &#8212; pdb_prot_align 0.4.0 documentation</title>
+    <title>colorschemes &#8212; pdb_prot_align 0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="genbank" href="pdb_prot_align.genbank.html" />
@@ -112,7 +111,7 @@ by providing <cite>palettable.sequential.cmocean.Dense_20.mpl_colormap</cite>.</
 <p class="rubric">Examples</p>
 <p>Make a data frame with some values, and two color maps (one with default
 ‘viridis’ and another with ‘cividis’) covering value range in data frame:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pdb_prot_align.colorschemes</span> <span class="kn">import</span> <span class="n">ValueToColorMap</span>
 <span class="go">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]})</span>
@@ -124,7 +123,7 @@ by providing <cite>palettable.sequential.cmocean.Dense_20.mpl_colormap</cite>.</
 </pre></div>
 </div>
 <p>Map values to colors using <a class="reference internal" href="#pdb_prot_align.colorschemes.ValueToColorMap.val_to_color" title="pdb_prot_align.colorschemes.ValueToColorMap.val_to_color"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ValueToColorMap.val_to_color()</span></code></a>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span>
 <span class="gp">... </span>      <span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map1</span><span class="o">.</span><span class="n">val_to_color</span><span class="p">),</span>
 <span class="gp">... </span>              <span class="n">color2</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map2</span><span class="o">.</span><span class="n">val_to_color</span><span class="p">),</span>
 <span class="gp">... </span>              <span class="p">)</span>
@@ -140,7 +139,7 @@ by providing <cite>palettable.sequential.cmocean.Dense_20.mpl_colormap</cite>.</
 </pre></div>
 </div>
 <p>Draw scale bars:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">map1</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">map1</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;viridis scale&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -148,7 +147,7 @@ by providing <cite>palettable.sequential.cmocean.Dense_20.mpl_colormap</cite>.</
 <div class="figure align-default">
 <img alt="_images/pdb_prot_align-colorschemes-3.png" src="_images/pdb_prot_align-colorschemes-3.png" />
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">map2</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">map2</span><span class="o">.</span><span class="n">scale_bar</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cividis scale&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -283,7 +282,7 @@ If <cite>values</cite> is single value, return single value; otherwise array.</p
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -300,7 +299,7 @@ If <cite>values</cite> is single value, return single value; otherwise array.</p
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

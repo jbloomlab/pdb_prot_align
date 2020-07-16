@@ -4,15 +4,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>genbank &#8212; pdb_prot_align 0.4.0 documentation</title>
+    <title>genbank &#8212; pdb_prot_align 0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="main" href="pdb_prot_align.main.html" />
@@ -63,7 +62,7 @@ sites to multiple features, the returned data frame is tidy.</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gb</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqRecord</span><span class="o">.</span><span class="n">SeqRecord</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gb</span> <span class="o">=</span> <span class="n">Bio</span><span class="o">.</span><span class="n">SeqRecord</span><span class="o">.</span><span class="n">SeqRecord</span><span class="p">(</span>
 <span class="gp">... </span>        <span class="n">seq</span><span class="o">=</span><span class="s1">&#39;MGKLLIT&#39;</span><span class="p">,</span>
 <span class="gp">... </span>        <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
 <span class="gp">... </span>        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
@@ -81,7 +80,7 @@ sites to multiple features, the returned data frame is tidy.</p>
 <span class="gp">... </span>        <span class="p">)</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">)</span>
 <span class="go">   isite amino_acid feature</span>
 <span class="go">0      1          M    1to2</span>
 <span class="go">1      2          G    1to2</span>
@@ -92,7 +91,7 @@ sites to multiple features, the returned data frame is tidy.</p>
 <span class="go">6      7          T     NaN</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">featureless_sites</span><span class="o">=</span><span class="s1">&#39;drop&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">featureless_sites</span><span class="o">=</span><span class="s1">&#39;drop&#39;</span><span class="p">)</span>
 <span class="go">   isite amino_acid feature</span>
 <span class="go">0      1          M    1to2</span>
 <span class="go">1      2          G    1to2</span>
@@ -102,7 +101,7 @@ sites to multiple features, the returned data frame is tidy.</p>
 <span class="go">5      6          I    4to6</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">)</span>
 <span class="go">   isite amino_acid feature</span>
 <span class="go">0      1          M    1to6</span>
 <span class="go">1      2          G    1to6</span>
@@ -113,7 +112,7 @@ sites to multiple features, the returned data frame is tidy.</p>
 <span class="go">6      7          T     NaN</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
 <span class="go">    isite amino_acid feature</span>
 <span class="go">0       1          M    1to6</span>
 <span class="go">1       1          M    1to2</span>
@@ -129,13 +128,13 @@ sites to multiple features, the returned data frame is tidy.</p>
 <span class="go">11      7          T     NaN</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
     <span class="o">...</span>
 <span class="gr">ValueError</span>: <span class="n">site 1 in multiple features</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">feature_color_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1to6&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;1to2&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;4to6&#39;</span><span class="p">:</span> <span class="s1">&#39;green&#39;</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">feature_color_map</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;1to6&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;1to2&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;4to6&#39;</span><span class="p">:</span> <span class="s1">&#39;green&#39;</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">genbank_to_feature_df</span><span class="p">(</span><span class="n">gb</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="n">feature_color_map</span><span class="o">=</span><span class="n">feature_color_map</span><span class="p">)</span>
 <span class="go">   isite amino_acid feature  color</span>
 <span class="go">0      1          M    1to2   blue</span>
@@ -228,7 +227,7 @@ sites to multiple features, the returned data frame is tidy.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -245,7 +244,7 @@ sites to multiple features, the returned data frame is tidy.</p>
       &copy;2019--2020.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
