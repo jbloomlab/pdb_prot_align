@@ -98,6 +98,13 @@ _ARGS = {
                       'computation of stats in "sites.csv" output files',
               'type': _str2bool,
               },
+         'drop_refprot': {
+              'required': False,
+              'default': False,
+              'help': 'drop reference protein from "alignment.fa" and '
+                      'computation of stats in "sites.csv" output files',
+              'type': _str2bool,
+              },
          'mafft': {
              'required': False,
              'default': 'mafft',
@@ -133,6 +140,7 @@ def run(protsfile,
         outprefix,
         ignore_gaps=True,
         drop_pdb=True,
+        drop_refprot=True,
         mafft='mafft',
         ):
     """Run main function to align proteins to reference and PDB chain(s).
@@ -224,17 +232,32 @@ def run(protsfile,
     assert all(len(p) == len(ref_pdb_site_map[p.description].dropna())
                for p in [refprot, *pdb_prots.values()])
 
-    # remove PDB sequences?
-    if drop_pdb:
-        print('Dropping PDB chains from alignment')
-        aln = [s for s in aln if s.description not in pdb_prot_headers]
-        assert len(aln) == len(prots)
-
     # strip gaps relative to reference sequence
     print(f"Stripping gaps relative to reference {refprot.description}")
     aln = pdb_prot_align.utils.strip_gaps_to_ref(aln,
                                                  refprot.description)
     assert all(len(refprot) == len(s) for _, s in aln)
+
+    # remove PDB sequences?
+    if drop_pdb:
+        print('Dropping PDB chains from alignment')
+        n = len(aln)
+        aln = [(head, s) for head, s in aln if head not in pdb_prot_headers]
+        assert len(aln) == len(prots) == n - len(pdb_prot_headers)
+
+    # remove reference protein?
+    if drop_refprot:
+        print('Dropping reference protein from alignment')
+        n = len(aln)
+        aln = [(head, s) for head, s in aln if head != refprot.description]
+        assert len(aln) == n - 1
+        if any(all(s[1][r] == '-' for s in aln) for r in range(len(refprot))):
+            if ignore_gaps:
+                raise ValueError('Some sites all gaps after dropping refprot. '
+                                 'To use `drop_refprot=True` for this '
+                                 'alignment, also use `ignore_gaps=False`')
+
+    # write alignment
     print(f"Writing gap-stripped alignment to {alignment}\n")
     with open(alignment, 'w') as f:
         f.write('\n'.join(f">{head}\n{s}" for head, s in aln))
@@ -342,7 +365,7 @@ def run(protsfile,
     print(f"Writing CSV with detailed information to {csv}")
     df.to_csv(csv, index=False, float_format='%.5f')
 
-    print(f"\nProgram complete.\n")
+    print('\nProgram complete.\n')
 
 
 # complete docs for `run` with parameter specs parsed from `_ARGS`

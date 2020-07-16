@@ -148,9 +148,10 @@ def alignment_to_count_df(fasta_alignment,
                    axis=0)
               .reset_index()
               )
-        if not numpy.allclose(1, df[char_cols].sum(axis=1)):
+        row_sums = df[char_cols].sum(axis=1)
+        if not numpy.allclose(1, row_sums):
             raise RuntimeError('rows do not sum to 1:\n' +
-                               str(df[char_cols].sum(axis=1)))
+                               str(sorted(row_sums.tolist())))
 
     if add_entropy_neff:
         if not as_freqs:
