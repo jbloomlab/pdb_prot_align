@@ -251,6 +251,11 @@ def run(protsfile,
         n = len(aln)
         aln = [(head, s) for head, s in aln if head != refprot.description]
         assert len(aln) == n - 1
+        if any(all(s[1][r] == '-' for s in aln) for r in range(len(refprot))):
+            if ignore_gaps:
+                raise ValueError('Some sites all gaps after dropping refprot. '
+                                 'To use `drop_refprot=True` for this '
+                                 'alignment, also use `ignore_gaps=False`')
 
     # write alignment
     print(f"Writing gap-stripped alignment to {alignment}\n")
@@ -360,7 +365,7 @@ def run(protsfile,
     print(f"Writing CSV with detailed information to {csv}")
     df.to_csv(csv, index=False, float_format='%.5f')
 
-    print(f"\nProgram complete.\n")
+    print('\nProgram complete.\n')
 
 
 # complete docs for `run` with parameter specs parsed from `_ARGS`
